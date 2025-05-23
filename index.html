@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Calculateur Pilote & PAX</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 20px;
+      display: block;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .calculator {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .slider-value {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #2a5;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 📊 Calculateur 1 -->
+  <div class="calculator">
+    <h2>Calculateur 1 : Montant pour le pilote</h2>
+
+    <label for="voucher">Valeur du voucher (€) :</label>
+    <input type="range" id="voucher" min="50" max="1000" value="100" oninput="updatePilote()">
+    <div class="slider-value">Valeur sélectionnée : <span id="voucherValue">100</span> €</div>
+
+    <label for="pax1">Nombre de passagers (PAX) :</label>
+    <input type="range" id="pax1" min="1" max="5" value="1" oninput="updatePilote()">
+    <div class="slider-value">Passagers sélectionnés : <span id="paxValue1">1</span></div>
+
+    <div class="result" id="resultatPilote">Le pilote recevra environ : 0 €</div>
+  </div>
+
+  <!-- 📊 Calculateur 2 -->
+  <div class="calculator">
+    <h2>Calculateur 2 : Prix du vol par passager</h2>
+
+    <label for="prixAvion">Prix de l'avion par heure (€) :</label>
+    <input type="range" id="prixAvion" min="10" max="2000" value="500" oninput="updatePrixPax()">
+    <div class="slider-value">Prix sélectionné : <span id="prixAvionValue">500</span> €/h</div>
+
+    <label for="tempsVol">Temps de vol (minutes) :</label>
+    <input type="range" id="tempsVol" min="10" max="150" value="60" oninput="updatePrixPax()">
+    <div class="slider-value">Temps sélectionné : <span id="tempsVolValue">60</span> min</div>
+
+    <label for="pax2">Nombre de passagers (PAX) :</label>
+    <input type="range" id="pax2" min="1" max="5" value="1" oninput="updatePrixPax()">
+    <div class="slider-value">Passagers sélectionnés : <span id="paxValue2">1</span></div>
+
+    <div class="result" id="resultatPax">Prix par passager : 0 €<br>Montant total : 0 €</div>
+  </div>
+
+  <script>
+    const TVA = 1.19;
+    const COMMISSION = 1.295;
+    const FIXE_PAR_PAX = 18;
+
+    function updatePilote() {
+      const voucher = parseFloat(document.getElementById('voucher').value);
+      const pax = parseInt(document.getElementById('pax1').value);
+
+      document.getElementById('voucherValue').innerText = voucher;
+      document.getElementById('paxValue1').innerText = pax;
+
+      const montantSansTaxes = voucher / (TVA * COMMISSION);
+      const argentPilote = montantSansTaxes - (pax * FIXE_PAR_PAX);
+
+      const result = argentPilote >= 0
+        ? `Le pilote recevra environ : ${argentPilote.toFixed(2)} €`
+        : `Valeur du voucher trop faible pour ${pax} passager(s).`;
+
+      document.getElementById('resultatPilote').innerText = result;
+    }
+
+    function updatePrixPax() {
+      const prixHeure = parseFloat(document.getElementById('prixAvion').value);
+      const tempsMin = parseFloat(document.getElementById('tempsVol').value);
+      const pax = parseInt(document.getElementById('pax2').value);
+
+      document.getElementById('prixAvionValue').innerText = prixHeure;
+      document.getElementById('tempsVolValue').innerText = tempsMin;
+      document.getElementById('paxValue2').innerText = pax;
+
+      const tempsHeure = tempsMin / 60;
+      const coutVolTotal = prixHeure * tempsHeure;
+      const partParPax = (coutVolTotal * pax) / (pax + 1);
+      const coutTotalVoucher = (partParPax + (pax * FIXE_PAR_PAX)) * TVA * COMMISSION;
+
+      const prixParPassager = Math.ceil(coutTotalVoucher / pax);
+      const montantTotal = prixParPassager * pax;
+
+      document.getElementById('resultatPax').innerHTML =
+        `Prix par passager : ${prixParPassager} €<br>Montant total : ${montantTotal} €`;
+    }
+
+    updatePilote();
+    updatePrixPax();
+  </script>
+</body>
+</html>
