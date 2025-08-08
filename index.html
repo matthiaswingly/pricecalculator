@@ -78,7 +78,7 @@
       <input type="range" id="paxPilote" min="1" max="5" value="1" oninput="updatePiloteInverse()">
       <div class="slider-value">Passagers : <span id="paxPiloteValue">1</span></div>
 
-      <label><input type="checkbox" id="pilotFFAPilote" onchange="updatePiloteInverse()"> Pilot FFA (+5 € par passager)</label>
+      <label><input type="checkbox" id="pilotFFAPilote" onchange="updatePiloteInverse()"> Pilot FFA (bonus +5 € par passager, sans TVA ni commission)</label>
 
       <div class="result" id="resultatPiloteInverse">Le pilote recevra environ : 0 € TTC</div>
       <div class="details" id="detailsPiloteInverse"></div>
@@ -124,63 +124,51 @@
       document.getElementById('voucherPiloteValue').innerText = voucherTotalTTC.toFixed(0);
       document.getElementById('paxPiloteValue').innerText = pax;
 
-      // Surcoût Pilot FFA (ajouté au voucher donc à retirer)
       const surcoutPilotFFA = pilotFFA ? 5 * pax : 0;
 
-      // Valeur voucher sans surcoût Pilot FFA
-      const voucherNetTTC = voucherTotalTTC - surcoutPilotFFA;
-      if (voucherNetTTC <= 0) {
-        document.getElementById('resultatPiloteInverse').innerText = "Valeur voucher trop faible après surcoût Pilot FFA.";
+      if (voucherTotalTTC <= 0) {
+        document.getElementById('resultatPiloteInverse').innerText = "Valeur voucher trop faible.";
         document.getElementById('detailsPiloteInverse').innerText = "";
         return;
       }
 
-      // Parts totales (pilote + pax)
       const totalParts = pax + 1;
-
-      // Voucher net HT
-      const voucherNetHT = voucherNetTTC / (1 + TVA_RATE);
-
-      // Coût par part HT
+      const voucherNetHT = voucherTotalTTC / (1 + TVA_RATE);
       const coutPartHT = voucherNetHT / totalParts;
 
-      // Part pilote HT
       const partPiloteHT = coutPartHT;
-
-      // Part passagers HT
       const partPassagersHT = coutPartHT * pax;
 
-      // Commission fixe
+      // Commission fixe et variable calculées uniquement sur part passagers HT (sans les 5 €)
       const commissionFixe = FIXE_PAR_PAX * pax;
-
-      // Commission variable (29,5% sur part passagers HT) arrondie vers le haut
       const commissionVariable = Math.ceil(partPassagersHT * COMMISSION_RATE);
-
-      // TVA sur commissions arrondie vers le haut
       const tvaCommissions = Math.ceil((commissionFixe + commissionVariable) * TVA_RATE);
 
-      // Montant net TTC pour le pilote
+      // Montant net TTC pilote calculé normalement (sans surcoût)
       const montantPiloteTTC = Math.max(0,
         (partPiloteHT * (1 + TVA_RATE)) - commissionFixe - commissionVariable - tvaCommissions
       );
 
+      // On ajoute les 5 € par passager sans TVA ni commission, directement au montant net pilote
+      const montantFinalPilote = montantPiloteTTC + surcoutPilotFFA;
+
       document.getElementById('resultatPiloteInverse').innerText =
-        `Le pilote recevra environ : ${montantPiloteTTC.toFixed(2)} € TTC`;
+        `Le pilote recevra environ : ${montantFinalPilote.toFixed(2)} € TTC`;
 
       const detailText =
 `Détails du calcul :
 - Voucher total TTC : ${voucherTotalTTC.toFixed(2)} €
-- Surcoût Pilot FFA : ${surcoutPilotFFA} €
-- Voucher net TTC : ${voucherNetTTC.toFixed(2)} €
+- Surcoût Pilot FFA (sans TVA ni commission) : ${surcoutPilotFFA} €
 - Voucher net HT : ${voucherNetHT.toFixed(2)} €
 - Parts totales (pilote + pax) : ${totalParts}
 - Coût par part HT : ${coutPartHT.toFixed(2)} €
 - Part pilote HT : ${partPiloteHT.toFixed(2)} €
-- Part passagers HT : ${partPassagersHT.toFixed(2)} €
+- Part passagers HT (sans surcoût) : ${partPassagersHT.toFixed(2)} €
 - Commission fixe (18€/pax) : ${commissionFixe} €
 - Commission variable (29,5%) arrondie : ${commissionVariable} €
 - TVA sur commissions arrondie : ${tvaCommissions} €
-- Montant net TTC pour le pilote : ${montantPiloteTTC.toFixed(2)} €`;
+- Montant net TTC pour le pilote (avant surcoût) : ${montantPiloteTTC.toFixed(2)} €
+- Montant final TTC pilote (avec surcoût FFA) : ${montantFinalPilote.toFixed(2)} €`;
 
       document.getElementById('detailsPiloteInverse').innerText = detailText;
     }
@@ -216,41 +204,38 @@
       // Commission variable arrondie vers le haut
       const commissionVariable = Math.ceil(partPassagersHT * COMMISSION_RATE);
 
-      // Coût total HT estimé
-      const coutTotalHT = partPassagersHT + commissionFixe + commissionVariable;
+      // TVA sur commissions
+      const tvaCommissions = Math.ceil((commissionFixe + commissionVariable) * TVA_RATE);
 
-      // Coût total TTC estimé
-      const coutAvecTVA = coutTotalHT * (1 + TVA_RATE);
+      // Prix TTC par passager = (part passagers + commissions + TVA) / pax
+      const prixTotalPassagers = partPassagers + commissionFixe + commissionVariable + tvaCommissions;
+      const prixPax = prixTotalPassagers / pax;
 
-      // Prix par passager arrondi vers le haut
-      const prixParPassager = Math.ceil(coutAvecTVA / pax);
-
-      // Prix total
-      const prixTotal = prixParPassager * pax;
+      const prixTotal = coutVolTotal + commissionFixe + commissionVariable + tvaCommissions;
 
       document.getElementById('resultatPax').innerHTML =
-        `Prix par passager : ${prixParPassager} €<br>Prix total : ${prixTotal} €`;
+        `Prix par passager : ${prixPax.toFixed(2)} €<br />Prix total : ${prixTotal.toFixed(2)} €`;
 
-      const detailText =
+      document.getElementById('detailsPax').innerText =
 `Détails du calcul :
-- Coût vol base HT : ${coutVolBase.toFixed(2)} €
+- Coût vol base (hors TVA) : ${coutVolBase.toFixed(2)} €
 - Coût additionnel : ${coutAdditionnel.toFixed(2)} €
-- Coût total vol TTC : ${coutVolTotal.toFixed(2)} €
-- Part pilote (1 part) : ${partPilote.toFixed(2)} €
-- Part passagers : ${partPassagers.toFixed(2)} €
-- Commission fixe (18€/pax) : ${commissionFixe} €
+- Coût total vol : ${coutVolTotal.toFixed(2)} €
+- Parts totales (pilote + pax) : ${pax + 1}
+- Part pilote (HT) : ${(partPilote / (1 + TVA_RATE)).toFixed(2)} €
+- Part passagers (HT) : ${partPassagersHT.toFixed(2)} €
+- Commission fixe : ${commissionFixe} €
 - Commission variable (29,5%) arrondie : ${commissionVariable} €
-- Coût total HT estimé : ${coutTotalHT.toFixed(2)} €
-- Coût total TTC estimé : ${coutAvecTVA.toFixed(2)} €
-- Prix par passager arrondi : ${prixParPassager} €
-- Prix total : ${prixTotal} €`;
-
-      document.getElementById('detailsPax').innerText = detailText;
+- TVA sur commissions arrondie : ${tvaCommissions} €
+- Prix TTC par passager : ${prixPax.toFixed(2)} €
+- Prix total TTC : ${prixTotal.toFixed(2)} €`;
     }
 
-    // Initialisation des deux calculateurs
+    // Initialisation au chargement
     updatePiloteInverse();
     updatePrixPax();
+
   </script>
+
 </body>
 </html>
