@@ -8,15 +8,22 @@
     body {
       font-family: Arial, sans-serif;
       margin: 1em auto;
-      max-width: 500px;
+      max-width: 700px;
       padding: 0 10px;
     }
+    .container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
     .calculator {
+      flex: 1 1 320px;
       border: 1px solid #ccc;
       border-radius: 8px;
       padding: 12px;
-      margin-bottom: 20px;
       background: #f9f9f9;
+      box-sizing: border-box;
+      min-width: 320px;
     }
     h2 {
       font-size: 1.1em;
@@ -27,10 +34,11 @@
       margin-top: 10px;
       font-size: 0.9em;
     }
-    input, button {
+    input[type="range"], input[type="number"] {
       width: 100%;
       padding: 6px;
       margin-top: 4px;
+      box-sizing: border-box;
     }
     .slider-value {
       font-size: 0.85em;
@@ -43,105 +51,120 @@
       color: #2a5;
     }
     .details {
-      font-size: 0.75em;
+      font-size: 0.8em;
       color: #555;
       margin-top: 8px;
+      background: #e8f0e8;
+      padding: 8px;
+      border-radius: 4px;
       line-height: 1.3em;
-      border-top: 1px solid #ccc;
-      padding-top: 8px;
+      white-space: pre-line;
     }
   </style>
 </head>
 <body>
 
-  <!-- Calculateur 1 modifié -->
-  <div class="calculator">
-    <h2>💸 Montant pour le pilote X</h2>
+  <div class="container">
 
-    <label for="voucher">Valeur du voucher (€) :</label>
-    <input type="range" id="voucher" min="50" max="1000" value="152" oninput="updatePilote()">
-    <div class="slider-value">Sélectionné : <span id="voucherValue">152</span> €</div>
+    <!-- Calculateur 1 modifié -->
+    <div class="calculator">
+      <h2>💸 Montant net pour le pilote</h2>
 
-    <label for="pax">Nombre de passagers :</label>
-    <input type="range" id="pax" min="1" max="5" value="1" oninput="updatePilote()">
-    <div class="slider-value">Passagers : <span id="paxValue">1</span></div>
+      <label for="voucher1">Valeur totale du voucher (tous passagers) (€) :</label>
+      <input type="number" id="voucher1" min="50" max="5000" value="152" step="1" oninput="updatePilote()">
+      <div class="slider-value">Total voucher : <span id="voucher1Value">152</span> €</div>
 
-    <div class="result" id="resultatPilote">Le pilote recevra environ : 0 €</div>
+      <label for="pax1">Nombre de passagers :</label>
+      <input type="range" id="pax1" min="1" max="5" value="1" oninput="updatePilote()">
+      <div class="slider-value">Passagers : <span id="pax1Value">1</span></div>
 
-    <div class="details" id="detailsPilote">
-      <!-- détails des étapes ici -->
+      <div class="result" id="resultatPilote">Le pilote recevra environ : 0 €</div>
+      <div class="details" id="detailsPilote"></div>
     </div>
-  </div>
 
-  <!-- Calculateur 2 -->
-  <div class="calculator">
-    <h2>✈️ Prix du vol</h2>
+    <!-- Calculateur 2 (prix du vol) -->
+    <div class="calculator">
+      <h2>✈️ Prix du vol</h2>
 
-    <label for="prixAvion2">Prix avion par heure (€) :</label>
-    <input type="range" id="prixAvion2" min="10" max="2000" value="200" oninput="updatePrixPax()">
-    <div class="slider-value">Prix avion : <span id="prixAvion2Value">200</span> €/h</div>
+      <label for="prixAvion2">Prix avion par heure (€) :</label>
+      <input type="range" id="prixAvion2" min="10" max="2000" value="200" oninput="updatePrixPax()">
+      <div class="slider-value">Prix avion : <span id="prixAvion2Value">200</span> €/h</div>
 
-    <label for="tempsVol2">Temps de vol (minutes) :</label>
-    <input type="range" id="tempsVol2" min="10" max="150" value="60" oninput="updatePrixPax()">
-    <div class="slider-value">Temps vol : <span id="tempsVol2Value">60</span> min</div>
+      <label for="tempsVol2">Temps de vol (minutes) :</label>
+      <input type="range" id="tempsVol2" min="10" max="150" value="60" oninput="updatePrixPax()">
+      <div class="slider-value">Temps vol : <span id="tempsVol2Value">60</span> min</div>
 
-    <label for="coutAdditionnel2">Coût additionnel (€) :</label>
-    <input type="range" id="coutAdditionnel2" min="0" max="300" value="0" oninput="updatePrixPax()">
-    <div class="slider-value">Coût additionnel : <span id="coutAdditionnel2Value">0</span> €</div>
+      <label for="coutAdditionnel2">Coût additionnel (€) :</label>
+      <input type="range" id="coutAdditionnel2" min="0" max="300" value="0" oninput="updatePrixPax()">
+      <div class="slider-value">Coût additionnel : <span id="coutAdditionnel2Value">0</span> €</div>
 
-    <label for="pax2">Nombre de passagers :</label>
-    <input type="range" id="pax2" min="1" max="5" value="1" oninput="updatePrixPax()">
-    <div class="slider-value">Passagers : <span id="pax2Value">1</span></div>
+      <label for="pax2">Nombre de passagers :</label>
+      <input type="range" id="pax2" min="1" max="5" value="1" oninput="updatePrixPax()">
+      <div class="slider-value">Passagers : <span id="pax2Value">1</span></div>
 
-    <div class="result" id="resultatPax">Prix par passager : 0 €<br />Prix total : 0 €</div>
+      <div class="result" id="resultatPax">Prix par passager : 0 €<br />Prix total : 0 €</div>
+      <div class="details" id="detailsPax"></div>
+    </div>
+
   </div>
 
   <script>
     const TVA_RATE = 0.19;       // 19%
-    const COMMISSION_RATE = 0.295; // 29.5%
+    const COMMISSION_RATE = 0.29; // 29% commission variable
     const FIXE_PAR_PAX = 18;      // 18 € fixe par pax
 
-    function arrondiSup(nombre) {
-      return Math.ceil(nombre);
-    }
-
+    // Calculateur 1 : montant net pour le pilote à partir du voucher total TTC payé par tous les passagers
     function updatePilote() {
-      const voucher = parseFloat(document.getElementById('voucher').value);
-      const pax = parseInt(document.getElementById('pax').value);
+      let voucherTotal = parseFloat(document.getElementById('voucher1').value);
+      let pax = parseInt(document.getElementById('pax1').value);
 
-      document.getElementById('voucherValue').innerText = voucher;
-      document.getElementById('paxValue').innerText = pax;
+      if (voucherTotal < 0 || pax < 1) {
+        document.getElementById('resultatPilote').innerText = "Entrée invalide.";
+        return;
+      }
 
-      // Calcul montant HT du voucher
-      const montantHT = voucher / (1 + TVA_RATE);
+      document.getElementById('voucher1Value').innerText = voucherTotal.toFixed(2);
+      document.getElementById('pax1Value').innerText = pax;
 
-      // Commission fixe totale
-      const commissionFixe = pax * FIXE_PAR_PAX;
+      // Calcul du montant net HT pour le pilote
+      const commissionFixeTTC = FIXE_PAR_PAX * pax * (1 + TVA_RATE);
+      const denom = 1 + COMMISSION_RATE * (1 + TVA_RATE);
+      const montantPiloteHT = (voucherTotal - commissionFixeTTC) / denom;
 
-      // Montant pilote calculé selon la formule inversée :
-      // montantHT - commissionFixe = montantPilote * (1 + COMMISSION_RATE)
-      // donc montantPilote = (montantHT - commissionFixe) / (1 + COMMISSION_RATE)
-      const montantPilote = (montantHT - commissionFixe) / (1 + COMMISSION_RATE);
+      // Calcul commission variable HT
+      const commissionVariableHT = montantPiloteHT * COMMISSION_RATE;
 
-      // Calcul commission variable
-      const commissionVariable = montantPilote * COMMISSION_RATE;
+      // TVA sur commission fixe + variable
+      const TVA_commissionFixe = commissionFixeTTC - (FIXE_PAR_PAX * pax);
+      const TVA_commissionVariable = commissionVariableHT * TVA_RATE;
 
-      const result = montantPilote >= 0
-        ? `Le pilote recevra environ : ${montantPilote.toFixed(2)} €`
-        : `Valeur du voucher trop faible pour ${pax} passager(s).`;
+      // Total TVA commissions
+      const TVA_total = TVA_commissionFixe + TVA_commissionVariable;
 
-      document.getElementById('resultatPilote').innerText = result;
+      // Montant net TTC pour le pilote
+      const montantPiloteTTC = montantPiloteHT * (1 + TVA_RATE);
 
-      // Affichage des détails
-      document.getElementById('detailsPilote').innerHTML = `
-        <div>Montant HT (voucher / 1.19) : ${montantHT.toFixed(2)} €</div>
-        <div>Commission fixe (18€ × pax) : ${commissionFixe.toFixed(2)} €</div>
-        <div>Montant pilote calculé : ${montantPilote.toFixed(2)} €</div>
-        <div>Commission variable (29.5% × montant pilote) : ${commissionVariable.toFixed(2)} €</div>
-        <div>Vérification : montantHT - commissionFixe = montantPilote + commissionVariable = ${(montantPilote + commissionVariable).toFixed(2)} €</div>
-      `;
+      const resultText = montantPiloteTTC >= 0
+        ? `Le pilote recevra environ : ${montantPiloteTTC.toFixed(2)} € TTC`
+        : `Le voucher est trop faible pour ${pax} passager(s).`;
+
+      document.getElementById('resultatPilote').innerText = resultText;
+
+      const detailText =
+`Détails du calcul :
+- Voucher total TTC : ${voucherTotal.toFixed(2)} €
+- Commission fixe TTC (18€/pax) : ${commissionFixeTTC.toFixed(2)} €
+- Montant pilote HT (base pour commission variable) : ${montantPiloteHT.toFixed(2)} €
+- Commission variable HT (29% sur montant pilote HT) : ${commissionVariableHT.toFixed(2)} €
+- TVA sur commissions fixes : ${TVA_commissionFixe.toFixed(2)} €
+- TVA sur commission variable : ${TVA_commissionVariable.toFixed(2)} €
+- TVA totale sur commissions : ${TVA_total.toFixed(2)} €
+- Montant pilote TTC (net) : ${montantPiloteTTC.toFixed(2)} €`;
+
+      document.getElementById('detailsPilote').innerText = detailText;
     }
 
+    // Calculateur 2 : prix par passager et total
     function updatePrixPax() {
       const prixHeure = parseFloat(document.getElementById('prixAvion2').value);
       const tempsMin = parseFloat(document.getElementById('tempsVol2').value);
@@ -159,8 +182,7 @@
       // On ajoute le coût additionnel
       const coutVolTotal = coutVolBase + coutAdditionnel;
 
-      // Partage du coût total entre les passagers + une part pour le pilote
-      // On considère pax+1 parts (pax passagers + 1 pilote)
+      // Partage du coût total entre les passagers + une part pour le pilote (pax + 1 parts)
       const partPilote = coutVolTotal / (pax + 1);
       const partPassagers = coutVolTotal - partPilote;
 
@@ -171,13 +193,15 @@
       const partPassagersHT = partPassagers / (1 + TVA_RATE);
 
       // Commission variable arrondie sur part passagers HT
-      const commissionVariable = arrondiSup(partPassagersHT * COMMISSION_RATE);
+      const commissionVariable = Math.ceil(partPassagersHT * COMMISSION_RATE);
 
       // Coût total final (part passagers HT + commissions + TVA)
-      const coutTotal = partPassagersHT + commissionFixe + commissionVariable;
+      const coutTotalHT = partPassagersHT + commissionFixe + commissionVariable;
 
-      // Ajout TVA
-      const coutAvecTVA = coutTotal * (1 + TVA_RATE);
+      // TVA sur tout sauf commissionVariable (selon ta logique)
+      // Ici on applique TVA sur coutTotalHT sauf commissionVariable, puis ajout commissionVariable
+      // Pour simplifier on applique TVA sur tout sauf commissionVariable puis ajout commissionVariable (pas parfait mais cohérent)
+      const coutAvecTVA = coutTotalHT * (1 + TVA_RATE);
 
       // Prix par passager arrondi
       const prixParPassager = Math.ceil(coutAvecTVA / pax);
@@ -185,12 +209,26 @@
 
       document.getElementById('resultatPax').innerHTML =
         `Prix par passager : ${prixParPassager} €<br />Prix total : ${prixTotal} €`;
+
+      const detailText =
+`Détails du calcul :
+- Prix avion base (€/h) : ${prixHeure} €
+- Temps vol (heures) : ${tempsHeure.toFixed(2)} h
+- Coût vol base : ${coutVolBase.toFixed(2)} €
+- Coût additionnel : ${coutAdditionnel.toFixed(2)} €
+- Coût total vol : ${coutVolTotal.toFixed(2)} €
+- Part pilote (1 part) : ${partPilote.toFixed(2)} €
+- Part passagers (HT) : ${partPassagersHT.toFixed(2)} €
+- Commission fixe (18€/pax) : ${commissionFixe} €
+- Commission variable (29% sur part passagers HT) : ${commissionVariable} €
+- Coût total HT estimé : ${coutTotalHT.toFixed(2)} €
+- Coût total TTC estimé : ${coutAvecTVA.toFixed(2)} €`;
+
+      document.getElementById('detailsPax').innerText = detailText;
     }
 
-    // Initialisation
     updatePilote();
     updatePrixPax();
   </script>
-
 </body>
 </html>
