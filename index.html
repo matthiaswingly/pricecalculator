@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Calculateur Vol corrigé</title>
+  <title>Calculateur Vol</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -11,7 +11,6 @@
       max-width: 500px;
       padding: 0 10px;
     }
-
     .calculator {
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -19,30 +18,25 @@
       margin-bottom: 20px;
       background: #f9f9f9;
     }
-
     h2 {
       font-size: 1.1em;
       margin-top: 0;
     }
-
     label {
       display: block;
       margin-top: 10px;
       font-size: 0.9em;
     }
-
     input, button {
       width: 100%;
       padding: 6px;
       margin-top: 4px;
     }
-
     .slider-value {
       font-size: 0.85em;
       margin-top: 4px;
       font-style: italic;
     }
-
     .result {
       margin-top: 10px;
       font-weight: bold;
@@ -52,25 +46,17 @@
 </head>
 <body>
 
-  <!-- Calculateur 1 -->
+  <!-- Calculateur 1 simplifié -->
   <div class="calculator">
-    <h2>💸 Montant pour le pilote X2</h2>
+    <h2>💸 Montant pour le pilote X</h2>
 
-    <label for="prixAvion1">Prix avion par heure (€) :</label>
-    <input type="range" id="prixAvion1" min="10" max="2000" value="100" oninput="updatePilote()">
-    <div class="slider-value">Prix avion : <span id="prixAvion1Value">100</span> €/h</div>
+    <label for="voucher">Valeur du voucher (€) :</label>
+    <input type="range" id="voucher" min="50" max="1000" value="100" oninput="updatePilote()">
+    <div class="slider-value">Sélectionné : <span id="voucherValue">100</span> €</div>
 
-    <label for="tempsVol1">Temps de vol (minutes) :</label>
-    <input type="range" id="tempsVol1" min="10" max="150" value="60" oninput="updatePilote()">
-    <div class="slider-value">Temps vol : <span id="tempsVol1Value">60</span> min</div>
-
-    <label for="coutAdditionnel1">Coût additionnel (€) :</label>
-    <input type="range" id="coutAdditionnel1" min="1" max="300" value="50" oninput="updatePilote()">
-    <div class="slider-value">Coût additionnel : <span id="coutAdditionnel1Value">50</span> €</div>
-
-    <label for="pax1">Nombre de passagers :</label>
-    <input type="range" id="pax1" min="1" max="5" value="1" oninput="updatePilote()">
-    <div class="slider-value">Passagers : <span id="pax1Value">1</span></div>
+    <label for="pax">Nombre de passagers :</label>
+    <input type="range" id="pax" min="1" max="5" value="1" oninput="updatePilote()">
+    <div class="slider-value">Passagers : <span id="paxValue">1</span></div>
 
     <div class="result" id="resultatPilote">Le pilote recevra environ : 0 €</div>
   </div>
@@ -88,7 +74,7 @@
     <div class="slider-value">Temps vol : <span id="tempsVol2Value">60</span> min</div>
 
     <label for="coutAdditionnel2">Coût additionnel (€) :</label>
-    <input type="range" id="coutAdditionnel2" min="1" max="300" value="50" oninput="updatePrixPax()">
+    <input type="range" id="coutAdditionnel2" min="0" max="300" value="50" oninput="updatePrixPax()">
     <div class="slider-value">Coût additionnel : <span id="coutAdditionnel2Value">50</span> €</div>
 
     <label for="pax2">Nombre de passagers :</label>
@@ -99,78 +85,84 @@
   </div>
 
   <script>
-    const TVA_RATE = 0.19;
-    const COMMISSION_RATE = 0.29;
-    const FIXE_PAR_PAX = 18;
+    const TVA_RATE = 0.19;       // 19%
+    const COMMISSION_RATE = 0.29; // 29% variable
+    const FIXE_PAR_PAX = 18;      // 18 € fixe par pax
 
     function arrondiSup(nombre) {
       return Math.ceil(nombre);
     }
 
     function updatePilote() {
-      const prixAvion = parseFloat(document.getElementById('prixAvion1').value);
-      const tempsVol = parseFloat(document.getElementById('tempsVol1').value);
-      const coutAdditionnel = parseFloat(document.getElementById('coutAdditionnel1').value);
-      const pax = parseInt(document.getElementById('pax1').value);
+      const voucher = parseFloat(document.getElementById('voucher').value);
+      const pax = parseInt(document.getElementById('pax').value);
 
-      document.getElementById('prixAvion1Value').innerText = prixAvion;
-      document.getElementById('tempsVol1Value').innerText = tempsVol;
-      document.getElementById('coutAdditionnel1Value').innerText = coutAdditionnel;
-      document.getElementById('pax1Value').innerText = pax;
+      document.getElementById('voucherValue').innerText = voucher;
+      document.getElementById('paxValue').innerText = pax;
 
-      const tempsHeure = tempsVol / 60;
-      const coutAvionTotal = prixAvion * tempsHeure;
-      const coutVolTotal = coutAvionTotal + coutAdditionnel;
+      // TVA retirée du voucher
+      const montantHT = voucher / (1 + TVA_RATE);
 
-      // Part du pilote (coût partagé entre pax + pilote)
-      const partPilote = coutVolTotal / (pax + 1);
+      // Commission fixe totale
+      const commissionFixe = pax * FIXE_PAR_PAX;
 
-      // Commissions
-      const commissionFixeTotale = FIXE_PAR_PAX * pax;
-      const commissionVariable = arrondiSup(partPilote * COMMISSION_RATE);
-      const commissionTotale = commissionFixeTotale + commissionVariable;
+      // Commission variable sur le montant HT, arrondi à l'entier supérieur
+      const commissionVariable = arrondiSup(montantHT * COMMISSION_RATE);
 
-      // TVA sur commission
-      const tvaCommission = arrondiSup(commissionTotale * TVA_RATE);
-
-      // Montant final pour le pilote
-      const montantPilote = partPilote - commissionTotale - tvaCommission;
+      // Montant restant pour le pilote
+      const montantPilote = montantHT - commissionFixe - commissionVariable;
 
       const result = montantPilote >= 0
         ? `Le pilote recevra environ : ${montantPilote.toFixed(2)} €`
-        : `Valeur trop faible pour ${pax} passager(s).`;
+        : `Valeur du voucher trop faible pour ${pax} passager(s).`;
 
       document.getElementById('resultatPilote').innerText = result;
     }
 
     function updatePrixPax() {
-      const prixAvion = parseFloat(document.getElementById('prixAvion2').value);
-      const tempsVol = parseFloat(document.getElementById('tempsVol2').value);
+      const prixHeure = parseFloat(document.getElementById('prixAvion2').value);
+      const tempsMin = parseFloat(document.getElementById('tempsVol2').value);
       const coutAdditionnel = parseFloat(document.getElementById('coutAdditionnel2').value);
       const pax = parseInt(document.getElementById('pax2').value);
 
-      document.getElementById('prixAvion2Value').innerText = prixAvion;
-      document.getElementById('tempsVol2Value').innerText = tempsVol;
+      document.getElementById('prixAvion2Value').innerText = prixHeure;
+      document.getElementById('tempsVol2Value').innerText = tempsMin;
       document.getElementById('coutAdditionnel2Value').innerText = coutAdditionnel;
       document.getElementById('pax2Value').innerText = pax;
 
-      const tempsHeure = tempsVol / 60;
-      const coutAvionTotal = prixAvion * tempsHeure;
-      const coutVolTotal = coutAvionTotal + coutAdditionnel;
+      const tempsHeure = tempsMin / 60;
+      const coutVolBase = prixHeure * tempsHeure;
 
-      // Part du passager (coût partagé entre pax + pilote)
-      const partPassager = coutVolTotal / (pax + 1);
+      // On ajoute le coût additionnel
+      const coutVolTotal = coutVolBase + coutAdditionnel;
 
-      // Commissions
-      const commissionFixeTotale = FIXE_PAR_PAX * pax;
-      const commissionVariable = arrondiSup(partPassager * COMMISSION_RATE);
-      const commissionTotale = commissionFixeTotale + commissionVariable;
+      // Partage du coût total entre les passagers + une part pour le pilote
+      // On considère pax+1 parts (pax passagers + 1 pilote)
+      const partPilote = coutVolTotal / (pax + 1);
+      const partPassagers = (coutVolTotal - partPilote);
 
-      // TVA sur commission
-      const tvaCommission = arrondiSup(commissionTotale * TVA_RATE);
+      // Commission fixe
+      const commissionFixe = pax * FIXE_PAR_PAX;
 
-      // Prix final par passager
-      const prixParPassager = arrondiSup(partPassager + commissionTotale + tvaCommission);
+      // Base pour calcul commission variable = part passagers HT (on enlève TVA)
+      const partPassagersHT = partPassagers / (1 + TVA_RATE);
+
+      // Commission variable arrondie sur part passagers HT
+      const commissionVariable = arrondiSup(partPassagersHT * COMMISSION_RATE);
+
+      // Coût total final (part passagers HT + commissions + TVA + commission variable)
+      const coutTotal = partPassagersHT + commissionFixe + commissionVariable;
+
+      // Ajout TVA et commission variable (sur la base HT)
+      // TVA est appliquée sur tout sauf commission variable (selon ta logique)
+      // Ici on applique TVA sur tout sauf commissionVariable, mais commissionVariable est incluse dans coutTotal,
+      // donc il faut retravailler ce calcul si besoin.
+
+      // Pour simplifier, on applique TVA sur coutTotal sauf commissionVariable, puis ajout commissionVariable
+      const coutAvecTVA = coutTotal * (1 + TVA_RATE);
+
+      // Prix par passager arrondi
+      const prixParPassager = Math.ceil(coutAvecTVA / pax);
       const prixTotal = prixParPassager * pax;
 
       document.getElementById('resultatPax').innerHTML =
