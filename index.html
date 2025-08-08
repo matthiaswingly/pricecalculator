@@ -102,6 +102,11 @@
       <input type="range" id="pax2" min="1" max="5" value="1" oninput="updatePrixPax()">
       <div class="slider-value">Passagers : <span id="pax2Value">1</span></div>
 
+      <label>
+        <input type="checkbox" id="pilotFFA" onchange="updatePrixPax()">
+        Pilote et Pilot FFA (+5 € par passager)
+      </label>
+
       <div class="result" id="resultatPax">Prix par passager : 0 €<br />Prix total : 0 €</div>
       <div class="details" id="detailsPax"></div>
     </div>
@@ -109,9 +114,10 @@
   </div>
 
   <script>
-    const TVA_RATE = 0.19;       // 19%
-    const COMMISSION_RATE = 0.29; // 29% commission variable
+    const TVA_RATE = 0.195;       // 19,5%
+    const COMMISSION_RATE = 0.295; // 29,5%
     const FIXE_PAR_PAX = 18;      // 18 € fixe par pax
+    const PILOT_FFA_SURCOUT = 5;  // 5 € par pax si Pilot & Pilot FFA
 
     // Calculateur 1 : montant net pour le pilote à partir du voucher total TTC payé par tous les passagers
     function updatePilote() {
@@ -164,47 +170,53 @@
       document.getElementById('detailsPilote').innerText = detailText;
     }
 
-    // Calculateur 2 : prix par passager et total
+    // Calculateur 2 : prix par passager et total avec checkbox Pilot FFA
     function updatePrixPax() {
       const prixHeure = parseFloat(document.getElementById('prixAvion2').value);
       const tempsMin = parseFloat(document.getElementById('tempsVol2').value);
       const coutAdditionnel = parseFloat(document.getElementById('coutAdditionnel2').value);
       const pax = parseInt(document.getElementById('pax2').value);
+      const pilotFFA = document.getElementById('pilotFFA').checked;
 
       document.getElementById('prixAvion2Value').innerText = prixHeure;
       document.getElementById('tempsVol2Value').innerText = tempsMin;
       document.getElementById('coutAdditionnel2Value').innerText = coutAdditionnel;
       document.getElementById('pax2Value').innerText = pax;
 
+      const totalParts = pax + 1; // pax + pilote
+
+      // Coût base du vol en €
       const tempsHeure = tempsMin / 60;
       const coutVolBase = prixHeure * tempsHeure;
 
-      // On ajoute le coût additionnel
+      // Ajout coût additionnel
       const coutVolTotal = coutVolBase + coutAdditionnel;
 
-      // Partage du coût total entre les passagers + une part pour le pilote (pax + 1 parts)
-      const partPilote = coutVolTotal / (pax + 1);
-      const partPassagers = coutVolTotal - partPilote;
+      // Part pilote
+      const partPilote = coutVolTotal / totalParts;
 
-      // Commission fixe
-      const commissionFixe = pax * FIXE_PAR_PAX;
+      // Coût pilote par pax pour commission variable
+      const partPiloteParPax = partPilote;
 
-      // Base pour calcul commission variable = part passagers HT (on enlève TVA)
-      const partPassagersHT = partPassagers / (1 + TVA_RATE);
+      // Commission variable arrondie vers le haut (sur partPiloteParPax)
+      const commissionVariable = Math.ceil(partPiloteParPax * COMMISSION_RATE);
 
-      // Commission variable arrondie sur part passagers HT
-      const commissionVariable = Math.ceil(partPassagersHT * COMMISSION_RATE);
+      // Commission fixe (18€/pax)
+      const commissionFixe = FIXE_PAR_PAX * pax;
 
-      // Coût total final (part passagers HT + commissions + TVA)
-      const coutTotalHT = partPassagersHT + commissionFixe + commissionVariable;
+      // Surcoût Pilot & Pilot FFA
+      const surcoutPilotFFA = pilotFFA ? PILOT_FFA_SURCOUT * pax : 0;
 
-      // TVA sur tout sauf commissionVariable (selon ta logique)
-      // Ici on applique TVA sur coutTotalHT sauf commissionVariable, puis ajout commissionVariable
-      // Pour simplifier on applique TVA sur tout sauf commissionVariable puis ajout commissionVariable (pas parfait mais cohérent)
-      const coutAvecTVA = coutTotalHT * (1 + TVA_RATE);
+      // TVA arrondie vers le haut sur commissions fixes + variables
+      const totalCommissions = commissionFixe + commissionVariable;
+      const tvaCommissions = Math.ceil(totalCommissions * TVA_RATE);
 
-      // Prix par passager arrondi
-      const prixParPassager = Math.ceil(coutAvecTVA / pax);
+      // Prix total par passager
+      // partPiloteParPax + (commissions + TVA + surcoût) / pax
+      const prixTotalParPassager = partPiloteParPax + (totalCommissions + tvaCommissions + surcoutPilotFFA) / pax;
+
+      // Arrondi final prix par pax
+      const prixParPassager = Math.ceil(prixTotalParPassager);
       const prixTotal = prixParPassager * pax;
 
       document.getElementById('resultatPax').innerHTML =
@@ -218,17 +230,20 @@
 - Coût additionnel : ${coutAdditionnel.toFixed(2)} €
 - Coût total vol : ${coutVolTotal.toFixed(2)} €
 - Part pilote (1 part) : ${partPilote.toFixed(2)} €
-- Part passagers (HT) : ${partPassagersHT.toFixed(2)} €
 - Commission fixe (18€/pax) : ${commissionFixe} €
-- Commission variable (29% sur part passagers HT) : ${commissionVariable} €
-- Coût total HT estimé : ${coutTotalHT.toFixed(2)} €
-- Coût total TTC estimé : ${coutAvecTVA.toFixed(2)} €`;
+- Commission variable (29,5% sur part pilote/pax) arrondie : ${commissionVariable} €
+- TVA sur commissions arrondie : ${tvaCommissions} €
+- Surcoût Pilot & Pilot FFA : ${surcoutPilotFFA} €
+- Prix total par passager arrondi : ${prixParPassager} €
+- Prix total pour ${pax} passager(s) : ${prixTotal} €`;
 
       document.getElementById('detailsPax').innerText = detailText;
     }
 
+    // Initialisation
     updatePilote();
     updatePrixPax();
   </script>
+
 </body>
 </html>
