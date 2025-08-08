@@ -66,20 +66,22 @@
 
   <div class="container">
 
-    <!-- Calculateur 1 modifié -->
+    <!-- Calculateur 1 modifié : Montant net pour le pilote -->
     <div class="calculator">
       <h2>💸 Montant net pour le pilote</h2>
 
-      <label for="voucher1">Valeur totale du voucher (tous passagers) (€) :</label>
-      <input type="number" id="voucher1" min="50" max="5000" value="152" step="1" oninput="updatePilote()">
-      <div class="slider-value">Total voucher : <span id="voucher1Value">152</span> €</div>
+      <label for="voucherPilote">Valeur totale du voucher (tous passagers) (€) :</label>
+      <input type="range" id="voucherPilote" min="50" max="5000" value="152" step="1" oninput="updatePiloteInverse()">
+      <div class="slider-value">Total voucher : <span id="voucherPiloteValue">152</span> €</div>
 
-      <label for="pax1">Nombre de passagers :</label>
-      <input type="range" id="pax1" min="1" max="5" value="1" oninput="updatePilote()">
-      <div class="slider-value">Passagers : <span id="pax1Value">1</span></div>
+      <label for="paxPilote">Nombre de passagers :</label>
+      <input type="range" id="paxPilote" min="1" max="5" value="1" oninput="updatePiloteInverse()">
+      <div class="slider-value">Passagers : <span id="paxPiloteValue">1</span></div>
 
-      <div class="result" id="resultatPilote">Le pilote recevra environ : 0 €</div>
-      <div class="details" id="detailsPilote"></div>
+      <label><input type="checkbox" id="pilotFFAPilote" onchange="updatePiloteInverse()"> Pilot FFA (+5 € par passager)</label>
+
+      <div class="result" id="resultatPiloteInverse">Le pilote recevra environ : 0 € TTC</div>
+      <div class="details" id="detailsPiloteInverse"></div>
     </div>
 
     <!-- Calculateur 2 (prix du vol) -->
@@ -102,11 +104,6 @@
       <input type="range" id="pax2" min="1" max="5" value="1" oninput="updatePrixPax()">
       <div class="slider-value">Passagers : <span id="pax2Value">1</span></div>
 
-      <label>
-        <input type="checkbox" id="pilotFFA" onchange="updatePrixPax()">
-        Pilote et Pilot FFA (+5 € par passager)
-      </label>
-
       <div class="result" id="resultatPax">Prix par passager : 0 €<br />Prix total : 0 €</div>
       <div class="details" id="detailsPax"></div>
     </div>
@@ -114,136 +111,146 @@
   </div>
 
   <script>
-    const TVA_RATE = 0.195;       // 19,5%
-    const COMMISSION_RATE = 0.295; // 29,5%
+    const TVA_RATE = 0.19;       // 19%
+    const COMMISSION_RATE = 0.295; // 29,5% commission variable
     const FIXE_PAR_PAX = 18;      // 18 € fixe par pax
-    const PILOT_FFA_SURCOUT = 5;  // 5 € par pax si Pilot & Pilot FFA
 
-    // Calculateur 1 : montant net pour le pilote à partir du voucher total TTC payé par tous les passagers
-    function updatePilote() {
-      let voucherTotal = parseFloat(document.getElementById('voucher1').value);
-      let pax = parseInt(document.getElementById('pax1').value);
+    // Calculateur 1 modifié : Montant net pour le pilote
+    function updatePiloteInverse() {
+      const voucherTotalTTC = parseFloat(document.getElementById('voucherPilote').value);
+      const pax = parseInt(document.getElementById('paxPilote').value);
+      const pilotFFA = document.getElementById('pilotFFAPilote').checked;
 
-      if (voucherTotal < 0 || pax < 1) {
-        document.getElementById('resultatPilote').innerText = "Entrée invalide.";
+      document.getElementById('voucherPiloteValue').innerText = voucherTotalTTC.toFixed(0);
+      document.getElementById('paxPiloteValue').innerText = pax;
+
+      // Surcoût Pilot FFA (ajouté au voucher donc à retirer)
+      const surcoutPilotFFA = pilotFFA ? 5 * pax : 0;
+
+      // Valeur voucher sans surcoût Pilot FFA
+      const voucherNetTTC = voucherTotalTTC - surcoutPilotFFA;
+      if (voucherNetTTC <= 0) {
+        document.getElementById('resultatPiloteInverse').innerText = "Valeur voucher trop faible après surcoût Pilot FFA.";
+        document.getElementById('detailsPiloteInverse').innerText = "";
         return;
       }
 
-      document.getElementById('voucher1Value').innerText = voucherTotal.toFixed(2);
-      document.getElementById('pax1Value').innerText = pax;
+      // Parts totales (pilote + pax)
+      const totalParts = pax + 1;
 
-      // Calcul du montant net HT pour le pilote
-      const commissionFixeTTC = FIXE_PAR_PAX * pax * (1 + TVA_RATE);
-      const denom = 1 + COMMISSION_RATE * (1 + TVA_RATE);
-      const montantPiloteHT = (voucherTotal - commissionFixeTTC) / denom;
+      // Voucher net HT
+      const voucherNetHT = voucherNetTTC / (1 + TVA_RATE);
 
-      // Calcul commission variable HT
-      const commissionVariableHT = montantPiloteHT * COMMISSION_RATE;
+      // Coût par part HT
+      const coutPartHT = voucherNetHT / totalParts;
 
-      // TVA sur commission fixe + variable
-      const TVA_commissionFixe = commissionFixeTTC - (FIXE_PAR_PAX * pax);
-      const TVA_commissionVariable = commissionVariableHT * TVA_RATE;
+      // Part pilote HT
+      const partPiloteHT = coutPartHT;
 
-      // Total TVA commissions
-      const TVA_total = TVA_commissionFixe + TVA_commissionVariable;
+      // Part passagers HT
+      const partPassagersHT = coutPartHT * pax;
+
+      // Commission fixe
+      const commissionFixe = FIXE_PAR_PAX * pax;
+
+      // Commission variable (29,5% sur part passagers HT) arrondie vers le haut
+      const commissionVariable = Math.ceil(partPassagersHT * COMMISSION_RATE);
+
+      // TVA sur commissions arrondie vers le haut
+      const tvaCommissions = Math.ceil((commissionFixe + commissionVariable) * TVA_RATE);
 
       // Montant net TTC pour le pilote
-      const montantPiloteTTC = montantPiloteHT * (1 + TVA_RATE);
+      const montantPiloteTTC = Math.max(0,
+        (partPiloteHT * (1 + TVA_RATE)) - commissionFixe - commissionVariable - tvaCommissions
+      );
 
-      const resultText = montantPiloteTTC >= 0
-        ? `Le pilote recevra environ : ${montantPiloteTTC.toFixed(2)} € TTC`
-        : `Le voucher est trop faible pour ${pax} passager(s).`;
-
-      document.getElementById('resultatPilote').innerText = resultText;
+      document.getElementById('resultatPiloteInverse').innerText =
+        `Le pilote recevra environ : ${montantPiloteTTC.toFixed(2)} € TTC`;
 
       const detailText =
 `Détails du calcul :
-- Voucher total TTC : ${voucherTotal.toFixed(2)} €
-- Commission fixe TTC (18€/pax) : ${commissionFixeTTC.toFixed(2)} €
-- Montant pilote HT (base pour commission variable) : ${montantPiloteHT.toFixed(2)} €
-- Commission variable HT (29% sur montant pilote HT) : ${commissionVariableHT.toFixed(2)} €
-- TVA sur commissions fixes : ${TVA_commissionFixe.toFixed(2)} €
-- TVA sur commission variable : ${TVA_commissionVariable.toFixed(2)} €
-- TVA totale sur commissions : ${TVA_total.toFixed(2)} €
-- Montant pilote TTC (net) : ${montantPiloteTTC.toFixed(2)} €`;
+- Voucher total TTC : ${voucherTotalTTC.toFixed(2)} €
+- Surcoût Pilot FFA : ${surcoutPilotFFA} €
+- Voucher net TTC : ${voucherNetTTC.toFixed(2)} €
+- Voucher net HT : ${voucherNetHT.toFixed(2)} €
+- Parts totales (pilote + pax) : ${totalParts}
+- Coût par part HT : ${coutPartHT.toFixed(2)} €
+- Part pilote HT : ${partPiloteHT.toFixed(2)} €
+- Part passagers HT : ${partPassagersHT.toFixed(2)} €
+- Commission fixe (18€/pax) : ${commissionFixe} €
+- Commission variable (29,5%) arrondie : ${commissionVariable} €
+- TVA sur commissions arrondie : ${tvaCommissions} €
+- Montant net TTC pour le pilote : ${montantPiloteTTC.toFixed(2)} €`;
 
-      document.getElementById('detailsPilote').innerText = detailText;
+      document.getElementById('detailsPiloteInverse').innerText = detailText;
     }
 
-    // Calculateur 2 : prix par passager et total avec checkbox Pilot FFA
+    // Calculateur 2 : prix par passager et total (inchangé)
     function updatePrixPax() {
       const prixHeure = parseFloat(document.getElementById('prixAvion2').value);
       const tempsMin = parseFloat(document.getElementById('tempsVol2').value);
       const coutAdditionnel = parseFloat(document.getElementById('coutAdditionnel2').value);
       const pax = parseInt(document.getElementById('pax2').value);
-      const pilotFFA = document.getElementById('pilotFFA').checked;
 
       document.getElementById('prixAvion2Value').innerText = prixHeure;
       document.getElementById('tempsVol2Value').innerText = tempsMin;
       document.getElementById('coutAdditionnel2Value').innerText = coutAdditionnel;
       document.getElementById('pax2Value').innerText = pax;
 
-      const totalParts = pax + 1; // pax + pilote
-
-      // Coût base du vol en €
       const tempsHeure = tempsMin / 60;
       const coutVolBase = prixHeure * tempsHeure;
 
-      // Ajout coût additionnel
+      // Coût total vol
       const coutVolTotal = coutVolBase + coutAdditionnel;
 
-      // Part pilote
-      const partPilote = coutVolTotal / totalParts;
+      // Part pilote (1 part)
+      const partPilote = coutVolTotal / (pax + 1);
+      const partPassagers = coutVolTotal - partPilote;
 
-      // Coût pilote par pax pour commission variable
-      const partPiloteParPax = partPilote;
+      // Commission fixe
+      const commissionFixe = pax * FIXE_PAR_PAX;
 
-      // Commission variable arrondie vers le haut (sur partPiloteParPax)
-      const commissionVariable = Math.ceil(partPiloteParPax * COMMISSION_RATE);
+      // Base pour commission variable = part passagers HT
+      const partPassagersHT = partPassagers / (1 + TVA_RATE);
 
-      // Commission fixe (18€/pax)
-      const commissionFixe = FIXE_PAR_PAX * pax;
+      // Commission variable arrondie vers le haut
+      const commissionVariable = Math.ceil(partPassagersHT * COMMISSION_RATE);
 
-      // Surcoût Pilot & Pilot FFA
-      const surcoutPilotFFA = pilotFFA ? PILOT_FFA_SURCOUT * pax : 0;
+      // Coût total HT estimé
+      const coutTotalHT = partPassagersHT + commissionFixe + commissionVariable;
 
-      // TVA arrondie vers le haut sur commissions fixes + variables
-      const totalCommissions = commissionFixe + commissionVariable;
-      const tvaCommissions = Math.ceil(totalCommissions * TVA_RATE);
+      // Coût total TTC estimé
+      const coutAvecTVA = coutTotalHT * (1 + TVA_RATE);
 
-      // Prix total par passager
-      // partPiloteParPax + (commissions + TVA + surcoût) / pax
-      const prixTotalParPassager = partPiloteParPax + (totalCommissions + tvaCommissions + surcoutPilotFFA) / pax;
+      // Prix par passager arrondi vers le haut
+      const prixParPassager = Math.ceil(coutAvecTVA / pax);
 
-      // Arrondi final prix par pax
-      const prixParPassager = Math.ceil(prixTotalParPassager);
+      // Prix total
       const prixTotal = prixParPassager * pax;
 
       document.getElementById('resultatPax').innerHTML =
-        `Prix par passager : ${prixParPassager} €<br />Prix total : ${prixTotal} €`;
+        `Prix par passager : ${prixParPassager} €<br>Prix total : ${prixTotal} €`;
 
       const detailText =
 `Détails du calcul :
-- Prix avion base (€/h) : ${prixHeure} €
-- Temps vol (heures) : ${tempsHeure.toFixed(2)} h
-- Coût vol base : ${coutVolBase.toFixed(2)} €
+- Coût vol base HT : ${coutVolBase.toFixed(2)} €
 - Coût additionnel : ${coutAdditionnel.toFixed(2)} €
-- Coût total vol : ${coutVolTotal.toFixed(2)} €
+- Coût total vol TTC : ${coutVolTotal.toFixed(2)} €
 - Part pilote (1 part) : ${partPilote.toFixed(2)} €
+- Part passagers : ${partPassagers.toFixed(2)} €
 - Commission fixe (18€/pax) : ${commissionFixe} €
-- Commission variable (29,5% sur part pilote/pax) arrondie : ${commissionVariable} €
-- TVA sur commissions arrondie : ${tvaCommissions} €
-- Surcoût Pilot & Pilot FFA : ${surcoutPilotFFA} €
-- Prix total par passager arrondi : ${prixParPassager} €
-- Prix total pour ${pax} passager(s) : ${prixTotal} €`;
+- Commission variable (29,5%) arrondie : ${commissionVariable} €
+- Coût total HT estimé : ${coutTotalHT.toFixed(2)} €
+- Coût total TTC estimé : ${coutAvecTVA.toFixed(2)} €
+- Prix par passager arrondi : ${prixParPassager} €
+- Prix total : ${prixTotal} €`;
 
       document.getElementById('detailsPax').innerText = detailText;
     }
 
-    // Initialisation
-    updatePilote();
+    // Initialisation des deux calculateurs
+    updatePiloteInverse();
     updatePrixPax();
   </script>
-
 </body>
 </html>
