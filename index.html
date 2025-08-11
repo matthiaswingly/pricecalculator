@@ -66,7 +66,7 @@
 
 <label><input type="checkbox" id="pilotFFAPilote" onchange="updatePrixPax()"> Pilot FFA (+5 € par passager, sans TVA ni commission)</label>
 
-<div class="result" id="resultatPax">Prix par passager : 0 €<br></div>
+<div class="result" id="resultatPax">Prix par passager : 0 €<br>Prix TTC pour tout le passager : 0 €</div>
 <div class="details" id="detailsPax"></div>
 
 <script>
@@ -110,17 +110,20 @@
     const commissionVariable = Math.ceil(partPassagers * COMMISSION_RATE);
     const tvaCommissions = Math.ceil((commissionFixe + commissionVariable) * TVA_RATE);
 
-    // Prix total TTC pour passagers = part passagers + commissions + TVA + surcoût FFA
+    // Prix TTC total pour passagers = part passagers + commissions + TVA + surcoût FFA
     const prixTotalPassagersTTC = partPassagers + commissionFixe + commissionVariable + tvaCommissions + surcoutPilotFFA;
 
-    // Prix TTC par passager
-    const prixParPassager = prixTotalPassagersTTC / pax;
+    // Prix TTC par passager (arrondi toujours à la hausse, sans décimales)
+    const prixParPassager = Math.ceil(prixTotalPassagersTTC / pax);
 
-    // Affichage résultats sans prix total TTC global
+    // Prix TTC total pour tout le passager (arrondi toujours à la hausse, sans décimales)
+    const prixTTCTotalPassagers = Math.ceil(prixTotalPassagersTTC);
+
+    // Affichage résultats
     document.getElementById('resultatPax').innerHTML =
-      `Prix par passager : ${prixParPassager.toFixed(2)} €<br>`;
+      `Prix par passager : ${prixParPassager} €<br>Prix TTC pour tout le passager : ${prixTTCTotalPassagers} €`;
 
-    // Détails sans (HT) et avec prix TTC total passagers
+    // Détails
     const detailText = 
 `Détails du calcul :
 - Coût vol base : ${coutVolBase.toFixed(2)} €
@@ -133,8 +136,8 @@
 - Commission variable (29,5%) arrondie : ${commissionVariable} €
 - TVA sur commissions arrondie : ${tvaCommissions} €
 - Surcoût Pilot FFA (sans TVA ni commission) : ${surcoutPilotFFA} €
-- Prix TTC pour tout le passager : ${prixTotalPassagersTTC.toFixed(2)} €
-- Prix TTC par passager : ${prixParPassager.toFixed(2)} €`;
+- Prix TTC par passager : ${prixParPassager} €
+- Prix TTC pour tout le passager : ${prixTTCTotalPassagers} €`;
 
     document.getElementById('detailsPax').innerText = detailText;
   }
