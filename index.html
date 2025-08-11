@@ -75,7 +75,7 @@
   const TVA_RATE = 0.19;          // TVA 19%
 
   function updatePrixPax() {
-    // Récup valeurs sliders / checkbox
+    // Récupération des valeurs
     const prixAvion = parseFloat(document.getElementById('prixAvion').value);
     const tempsVol = parseFloat(document.getElementById('tempsVol').value);
     const coutAdditionnel = parseFloat(document.getElementById('coutAdditionnel').value);
@@ -88,19 +88,21 @@
     document.getElementById('coutAdditionnelValue').innerText = coutAdditionnel;
     document.getElementById('paxValue').innerText = pax;
 
-    // Coût vol base HT
+    // Coût vol base HT (prix par heure * temps en heure)
     const coutVolBase = (prixAvion / 60) * tempsVol;
 
-    // Coût total vol HT
-    const coutVolTotal = coutVolBase + coutAdditionnel;
+    // Coût total vol HT (pilote + passagers)
+    const coutVolTotalHT = coutVolBase + coutAdditionnel;
 
-    // Répartition parts (pilote + pax)
+    // Répartition des parts
     const totalParts = pax + 1;
-    const coutPartHT = coutVolTotal / totalParts;
-    const partPiloteHT = coutPartHT;
-    const partPassagersHT = coutPartHT * pax;
+    // Part pilote HT = coût total vol HT divisé par total parts
+    const partPiloteHT = coutVolTotalHT / totalParts;
 
-    // Surcoût Pilot FFA (sans TVA ni commission)
+    // Part passagers HT = reste
+    const partPassagersHT = coutVolTotalHT - partPiloteHT;
+
+    // Surcoût Pilot FFA, sans TVA ni commission
     const surcoutPilotFFA = pilotFFA ? 5 * pax : 0;
 
     // Commissions sur part passagers HT
@@ -108,24 +110,25 @@
     const commissionVariable = Math.ceil(partPassagersHT * COMMISSION_RATE);
     const tvaCommissions = Math.ceil((commissionFixe + commissionVariable) * TVA_RATE);
 
-    // Prix total TTC passagers = part passagers HT + commissions + TVA + surcoût FFA
-    const prixTotalPassagers = partPassagersHT + commissionFixe + commissionVariable + tvaCommissions + surcoutPilotFFA;
+    // Prix total TTC pour passagers = part passagers + commissions + TVA + surcoût FFA
+    const prixTotalPassagersTTC = partPassagersHT + commissionFixe + commissionVariable + tvaCommissions + surcoutPilotFFA;
 
     // Prix TTC par passager
-    const prixParPassager = prixTotalPassagers / pax;
+    const prixParPassager = prixTotalPassagersTTC / pax;
 
     // Prix total TTC (pilote + passagers)
-    const prixTotalTTC = partPiloteHT + prixTotalPassagers;
+    const prixTotalTTC = partPiloteHT + prixTotalPassagersTTC;
 
     // Affichage résultats
     document.getElementById('resultatPax').innerHTML =
       `Prix par passager : ${prixParPassager.toFixed(2)} €<br>Prix total : ${prixTotalTTC.toFixed(2)} €`;
 
+    // Détails
     const detailText = 
 `Détails du calcul :
 - Coût vol base HT : ${coutVolBase.toFixed(2)} €
 - Coût additionnel : ${coutAdditionnel.toFixed(2)} €
-- Coût total vol HT : ${coutVolTotal.toFixed(2)} €
+- Coût total vol HT (pilote + pax) : ${coutVolTotalHT.toFixed(2)} €
 - Parts totales (pilote + pax) : ${totalParts}
 - Part pilote (HT) : ${partPiloteHT.toFixed(2)} €
 - Part passagers (HT) : ${partPassagersHT.toFixed(2)} €
@@ -139,7 +142,8 @@
     document.getElementById('detailsPax').innerText = detailText;
   }
 
-  updatePrixPax(); // initialisation
+  updatePrixPax();
 </script>
+
 </body>
 </html>
