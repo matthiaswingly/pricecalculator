@@ -66,7 +66,7 @@
 
 <label><input type="checkbox" id="pilotFFAPilote" onchange="updatePrixPax()"> Pilot FFA (+5 € par passager, sans TVA ni commission)</label>
 
-<div class="result" id="resultatPax">Prix par passager : 0 €<br>Prix total : 0 €</div>
+<div class="result" id="resultatPax">Prix par passager : 0 €<br></div>
 <div class="details" id="detailsPax"></div>
 
 <script>
@@ -116,14 +116,14 @@
     // Prix TTC par passager
     const prixParPassager = prixTotalPassagersTTC / pax;
 
-    // Prix total TTC (pilote + passagers)
-    const prixTotalTTC = partPiloteHT + prixTotalPassagersTTC;
+    // Suppression du calcul et affichage du prix total TTC (pilote + passagers)
+    // const prixTotalTTC = partPiloteHT + prixTotalPassagersTTC;
 
-    // Affichage résultats
+    // Affichage résultats sans prix total TTC
     document.getElementById('resultatPax').innerHTML =
-      `Prix par passager : ${prixParPassager.toFixed(2)} €<br>Prix total : ${prixTotalTTC.toFixed(2)} €`;
+      `Prix par passager : ${prixParPassager.toFixed(2)} €<br>`;
 
-    // Détails
+    // Détails sans la ligne prix total TTC
     const detailText = 
 `Détails du calcul :
 - Coût vol base HT : ${coutVolBase.toFixed(2)} €
@@ -136,8 +136,7 @@
 - Commission variable (29,5%) arrondie : ${commissionVariable} €
 - TVA sur commissions arrondie : ${tvaCommissions} €
 - Surcoût Pilot FFA (sans TVA ni commission) : ${surcoutPilotFFA} €
-- Prix TTC par passager : ${prixParPassager.toFixed(2)} €
-- Prix total TTC (pilote + passagers) : ${prixTotalTTC.toFixed(2)} €`;
+- Prix TTC par passager : ${prixParPassager.toFixed(2)} €`;
 
     document.getElementById('detailsPax').innerText = detailText;
   }
