@@ -88,36 +88,36 @@
     document.getElementById('coutAdditionnelValue').innerText = coutAdditionnel;
     document.getElementById('paxValue').innerText = pax;
 
-    // Coût vol base (prix par heure * temps en heure)
+    // Coût vol base HT (prix par heure * temps en heure)
     const coutVolBase = (prixAvion / 60) * tempsVol;
 
-    // Coût total vol (pilote + passagers)
-    const coutVolTotal = coutVolBase + coutAdditionnel;
+    // Coût total vol HT (pilote + passagers)
+    const coutVolTotalHT = coutVolBase + coutAdditionnel;
 
     // Répartition des parts
     const totalParts = pax + 1;
-    // Part pilote = coût total vol divisé par total parts
-    const partPilote = coutVolTotal / totalParts;
+    // Part pilote HT = coût total vol HT divisé par total parts
+    const partPiloteHT = coutVolTotalHT / totalParts;
 
-    // Part passagers = reste
-    const partPassagers = coutVolTotal - partPilote;
+    // Part passagers HT = reste
+    const partPassagersHT = coutVolTotalHT - partPiloteHT;
 
     // Surcoût Pilot FFA, sans TVA ni commission
     const surcoutPilotFFA = pilotFFA ? 5 * pax : 0;
 
-    // Commissions sur part passagers
+    // Commissions sur part passagers HT
     const commissionFixe = FIXE_PAR_PAX * pax;
-    const commissionVariable = Math.ceil(partPassagers * COMMISSION_RATE);
+    const commissionVariable = Math.ceil(partPassagersHT * COMMISSION_RATE);
     const tvaCommissions = Math.ceil((commissionFixe + commissionVariable) * TVA_RATE);
 
-    // Prix TTC total pour passagers = part passagers + commissions + TVA + surcoût FFA
-    const prixTotalPassagersTTC = partPassagers + commissionFixe + commissionVariable + tvaCommissions + surcoutPilotFFA;
+    // Prix total TTC pour passagers = part passagers + commissions + TVA + surcoût FFA
+    const prixTotalPassagersTTC = partPassagersHT + commissionFixe + commissionVariable + tvaCommissions + surcoutPilotFFA;
 
-    // Prix TTC par passager (arrondi toujours à la hausse, sans décimales)
+    // Arrondi à la hausse sans décimales pour prix TTC par passager
     const prixParPassager = Math.ceil(prixTotalPassagersTTC / pax);
 
-    // Prix TTC total pour tout le passager (arrondi toujours à la hausse, sans décimales)
-    const prixTTCTotalPassagers = Math.ceil(prixTotalPassagersTTC);
+    // Prix TTC total pour tous les passagers = prixParPassager * nombre de passagers
+    const prixTTCTotalPassagers = prixParPassager * pax;
 
     // Affichage résultats
     document.getElementById('resultatPax').innerHTML =
@@ -128,10 +128,10 @@
 `Détails du calcul :
 - Coût vol base : ${coutVolBase.toFixed(2)} €
 - Coût additionnel : ${coutAdditionnel.toFixed(2)} €
-- Coût total vol (pilote + pax) : ${coutVolTotal.toFixed(2)} €
+- Coût total vol (pilote + pax) : ${coutVolTotalHT.toFixed(2)} €
 - Parts totales (pilote + pax) : ${totalParts}
-- Part pilote : ${partPilote.toFixed(2)} €
-- Part passagers : ${partPassagers.toFixed(2)} €
+- Part pilote : ${partPiloteHT.toFixed(2)} €
+- Part passagers : ${partPassagersHT.toFixed(2)} €
 - Commission fixe (18€/pax) : ${commissionFixe} €
 - Commission variable (29,5%) arrondie : ${commissionVariable} €
 - TVA sur commissions arrondie : ${tvaCommissions} €
