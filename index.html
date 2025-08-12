@@ -237,7 +237,7 @@
     const surcoutPilotFFA = pilotFFA ? 5 * pax : 0;
 
     // Prix total TTC
-    const prixTotalTTC = basePassagerHT + commissionVariableMontant + tvaMontant + surcoutPilotFFA;
+    const prixTotalTTC = basePassagerHT + commissionFixe + commissionVariableMontant + tvaMontant + surcoutPilotFFA;
 
     // Prix TTC par passager (arrondi haut)
     const prixParPassager = arrondiHaut(prixTotalTTC / pax);
