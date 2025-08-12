@@ -230,8 +230,8 @@
     // Commission variable arrondie haut
     const commissionVariableMontant = arrondiHaut(basePassagerHT * COMMISSION_RATE);
 
-    // TVA arrondie haut sur base passager HT
-    const tvaMontant = arrondiHaut(basePassagerHT * tvaRate);
+    // TVA arrondie haut sur base passager HT // changed MATZE basePassagerHT --> commissionFixe + commissionVariableMontant 
+    const tvaMontant = arrondiHaut((commissionFixe + commissionVariableMontant) * tvaRate);
 
     // Surcoût pilot FFA
     const surcoutPilotFFA = pilotFFA ? 5 * pax : 0;
