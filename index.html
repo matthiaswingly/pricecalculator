@@ -77,18 +77,18 @@
 
 <!-- Calculateur 1 à gauche -->
 <div class="calculateur" id="calc1">
-  <h2>✈️ Calculateur 1</h2>
+  <h2>✈️ Calculateur Flight Costs </h2>
 
   <label for="prixAvion">Prix avion par heure (€) :</label>
-  <input type="range" id="prixAvion" min="10" max="2000" value="200" step="10" oninput="updateCalculateur1()">
+  <input type="range" id="prixAvion" min="10" max="2000" value="200" step="5" oninput="updateCalculateur1()">
   <div class="slider-value">Prix avion : <span id="prixAvionValue">200</span> €/h</div>
 
-  <label for="tempsVol">Temps de vol (minutes) :</label>
+  <label for="tempsVol">Temps de vol (min.) :</label>
   <input type="range" id="tempsVol" min="10" max="150" value="60" step="5" oninput="updateCalculateur1()">
   <div class="slider-value">Temps vol : <span id="tempsVolValue">60</span> min</div>
 
   <label for="coutAdditionnel">Coût additionnel (€) :</label>
-  <input type="range" id="coutAdditionnel" min="0" max="300" value="0" step="5" oninput="updateCalculateur1()">
+  <input type="range" id="coutAdditionnel" min="0" max="300" value="0" step="2" oninput="updateCalculateur1()">
   <div class="slider-value">Coût additionnel : <span id="coutAdditionnelValue">0</span> €</div>
 
   <label for="pax">Nombre de passagers :</label>
@@ -105,9 +105,9 @@
 
 <!-- Calculateur 2 à droite -->
 <div class="calculateur" id="calc2">
-  <h2>✈️ Calculateur 2</h2>
+  <h2>✈️ Voucher > Money Pilote </h2>
 
-  <label for="prixTotalSlider">Prix total TTC (vol + passagers) (€) :</label>
+  <label for="prixTotalSlider">Voucher Value (€) :</label>
   <input type="range" id="prixTotalSlider" min="50" max="5000" value="500" step="10" oninput="updateCalculateur2()">
   <div class="slider-value">Prix total TTC : <span id="prixTotalValue">500</span> €</div>
 
