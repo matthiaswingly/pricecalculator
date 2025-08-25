@@ -77,18 +77,18 @@
 
 <!-- Calculateur 1 à gauche -->
 <div class="calculateur" id="calc1">
-  <h2>✈️ Calculateur 1</h2>
+  <h2>✈️ Calculateur Flight Costs </h2>
 
   <label for="prixAvion">Prix avion par heure (€) :</label>
-  <input type="range" id="prixAvion" min="10" max="2000" value="200" step="10" oninput="updateCalculateur1()">
+  <input type="range" id="prixAvion" min="10" max="2000" value="200" step="5" oninput="updateCalculateur1()">
   <div class="slider-value">Prix avion : <span id="prixAvionValue">200</span> €/h</div>
 
-  <label for="tempsVol">Temps de vol (minutes) :</label>
+  <label for="tempsVol">Temps de vol (min.) :</label>
   <input type="range" id="tempsVol" min="10" max="150" value="60" step="5" oninput="updateCalculateur1()">
   <div class="slider-value">Temps vol : <span id="tempsVolValue">60</span> min</div>
 
   <label for="coutAdditionnel">Coût additionnel (€) :</label>
-  <input type="range" id="coutAdditionnel" min="0" max="300" value="0" step="5" oninput="updateCalculateur1()">
+  <input type="range" id="coutAdditionnel" min="0" max="300" value="0" step="2" oninput="updateCalculateur1()">
   <div class="slider-value">Coût additionnel : <span id="coutAdditionnelValue">0</span> €</div>
 
   <label for="pax">Nombre de passagers :</label>
@@ -105,9 +105,9 @@
 
 <!-- Calculateur 2 à droite -->
 <div class="calculateur" id="calc2">
-  <h2>✈️ Calculateur 2</h2>
+  <h2>✈️ Voucher > Money Pilote </h2>
 
-  <label for="prixTotalSlider">Prix total TTC (vol + passagers) (€) :</label>
+  <label for="prixTotalSlider">Voucher Value (€) :</label>
   <input type="range" id="prixTotalSlider" min="50" max="5000" value="500" step="10" oninput="updateCalculateur2()">
   <div class="slider-value">Prix total TTC : <span id="prixTotalValue">500</span> €</div>
 
@@ -261,42 +261,70 @@
       `- Nombre de passagers : ${pax}`;
   }
 
-  // Calculateur 2 (inchangé)
-  function updateCalculateur2() {
-    const prixTotalTTC = parseFloat(document.getElementById('prixTotalSlider').value);
-    const pax = parseInt(document.getElementById('pax2').value);
-    const pilotFFA = document.getElementById('pilotFFA2').checked;
-    const country = document.getElementById('country2').value;
-    const tvaRate = getTvaRate(country);
+function updateCalculateur2() {
+  const prixTTCTotalPassagers = parseFloat(document.getElementById('prixTotalSlider').value);
+  const pax = parseInt(document.getElementById('pax2').value);
+  const pilotFFA = document.getElementById('pilotFFA2').checked;
+  const country = document.getElementById('country2').value;
+  const tvaRate = getTvaRate(country);
 
-    document.getElementById('prixTotalValue').innerText = prixTotalTTC;
-    document.getElementById('pax2Value').innerText = pax;
+  document.getElementById('prixTotalValue').innerText = prixTTCTotalPassagers;
+  document.getElementById('pax2Value').innerText = pax;
 
-    // Calcul du prix HT total
-    const prixTotalHT = prixTotalTTC / (1 + tvaRate);
+  // Retirer le surcoût FFA d'abord
+  const surcoutPilotFFA = pilotFFA ? 5 * pax : 0;
+  let montantSansFFA = prixTTCTotalPassagers - surcoutPilotFFA;
 
-    // Commission fixe totale (par passager)
-    const commissionFixeTotale = FIXE_PAR_PAX * pax;
+  // On cherche Base passager HT, sachant que :
+  // prixTTCTotalPassagers = BasePassagerHT + commissionFixe + commissionVariable + TVA + surcoutFFA
+  // avec commissionFixe = 18 * pax
+  // et commissionVariable = arrondiHaut(BasePassagerHT * 0.295)
+  // et TVA = arrondiHaut((commissionFixe + commissionVariable) * tvaRate)
 
-    // Base passager HT total = prix total HT - commission fixe
-    const basePassagerHT = prixTotalHT - commissionFixeTotale;
+  const commissionFixe = FIXE_PAR_PAX * pax;
 
-    // Commission variable sur base passager HT
-    const commissionVariableMontant = basePassagerHT * COMMISSION_RATE;
+  // On va approximer en essayant BasePassagerHT croissant jusqu’à retomber sur le TTC donné
+  let basePassagerHT = 0;
+  let trouve = false;
+  for (let essai = 0; essai < montantSansFFA; essai++) {
+    const commissionVariable = arrondiHaut(essai * COMMISSION_RATE);
+    const tvaMontant = arrondiHaut((commissionFixe + commissionVariable) * tvaRate);
+    const totalReconstruit = essai + commissionFixe + commissionVariable + tvaMontant;
 
-    // TVA montant sur base passager HT
-    const tvaMontant = basePassagerHT * tvaRate;
-
-    // Surcoût pilot FFA
-    const surcoutPilotFFA = pilotFFA ? 5 * pax : 0;
-
-    document.getElementById('resultatCalculateur2').textContent =
-      `Part HT total passagers : ${basePassagerHT.toFixed(2)} €\n` +
-      `Commission fixe totale : ${commissionFixeTotale.toFixed(2)} €\n` +
-      `Commission variable : ${commissionVariableMontant.toFixed(2)} €\n` +
-      `TVA montant : ${tvaMontant.toFixed(2)} €\n` +
-      `Surcoût pilot FFA : ${surcoutPilotFFA.toFixed(2)} €`;
+    if (totalReconstruit === montantSansFFA) {
+      basePassagerHT = essai;
+      trouve = true;
+      break;
+    }
   }
+
+  if (!trouve) {
+    // Si on ne tombe pas exactement sur le TTC, prendre la valeur la plus proche
+    let meilleurEcart = Infinity;
+    for (let essai = 0; essai < montantSansFFA; essai++) {
+      const commissionVariable = arrondiHaut(essai * COMMISSION_RATE);
+      const tvaMontant = arrondiHaut((commissionFixe + commissionVariable) * tvaRate);
+      const totalReconstruit = essai + commissionFixe + commissionVariable + tvaMontant;
+      const ecart = Math.abs(totalReconstruit - montantSansFFA);
+      if (ecart < meilleurEcart) {
+        meilleurEcart = ecart;
+        basePassagerHT = essai;
+      }
+    }
+  }
+
+  const commissionVariable = arrondiHaut(basePassagerHT * COMMISSION_RATE);
+  const tvaMontant = arrondiHaut((commissionFixe + commissionVariable) * tvaRate);
+
+  document.getElementById('resultatCalculateur2').textContent =
+    `Base passager HT (arrondi haut) : ${basePassagerHT} €\n` +
+    `Commission fixe : ${commissionFixe} €\n` +
+    `Commission variable (arrondi haut) : ${commissionVariable} €\n` +
+    `TVA (arrondi haut) : ${tvaMontant} €\n` +
+    `Surcoût pilot FFA : ${surcoutPilotFFA} €\n` +
+    `Prix TTC total (entré) : ${prixTTCTotalPassagers} €`;
+}
+
 
   // Init selects et calculs par défaut
   remplirSelectPays('country1');
