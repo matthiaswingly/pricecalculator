@@ -245,19 +245,19 @@
     const prixTTCTotalPassagers = prixParPassager * pax;
 
     document.getElementById('resultatCalculateur1').innerHTML =
-      `- Prix TTC par passager : ${prixParPassager} €<br>` +
-      `- Prix TTC pour tout le passager : ${prixTTCTotalPassagers} €`;
+      `- Prix par passager : ${prixParPassager} €<br>` +
+      `- Prix total : ${prixTTCTotalPassagers} €`;
 
     document.getElementById('detailsCalculateur1').textContent =
       `Détail calcul:\n` +
-      `- Coût vol HT total : ${coutVolHT.toFixed(2)} €\n` +
-      `- Base passager HT (arrondi haut) : ${basePassagerHT} €\n` +
+      `- Coût vol total : ${coutVolHT.toFixed(2)} €\n` +
+      `- Remboursement Pilot (arrondi haut) : ${basePassagerHT} €\n` +
       `- Commission fixe : ${commissionFixe.toFixed(2)} €\n` +
-      `- Commission variable (arrondi haut) : ${commissionVariableMontant} €\n` +
+      `- Commission var. (arrondi haut) : ${commissionVariableMontant} €\n` +
       `- TVA (arrondi haut) : ${tvaMontant} €\n` +
-      `- Surcoût pilot FFA : ${surcoutPilotFFA} €\n` +
-      `- Prix total TTC : ${prixTotalTTC} €\n` +
-      `- Prix TTC par passager (arrondi haut) : ${prixParPassager} €\n` +
+      `- FFA : ${surcoutPilotFFA} €\n` +
+      `- Prix total : ${prixTotalTTC} €\n` +
+      `- Prix par passager (arrondi haut) : ${prixParPassager} €\n` +
       `- Nombre de passagers : ${pax}`;
   }
 
