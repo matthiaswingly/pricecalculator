@@ -245,8 +245,8 @@
     const prixTTCTotalPassagers = prixParPassager * pax;
 
     document.getElementById('resultatCalculateur1').innerHTML =
-      `- Prix par passager : ${prixParPassager} €<br>` +
-      `- Prix total : ${prixTTCTotalPassagers} €`;
+      `Prix par passager : ${prixParPassager} €<br>` +
+      `Prix total : ${prixTTCTotalPassagers} €`;
 
     document.getElementById('detailsCalculateur1').textContent =
       `Détail calcul:\n` +
@@ -256,8 +256,6 @@
       `- Commission var. (arrondi haut) : ${commissionVariableMontant} €\n` +
       `- TVA (arrondi haut) : ${tvaMontant} €\n` +
       `- FFA : ${surcoutPilotFFA} €\n` +
-      `- Prix total : ${prixTotalTTC} €\n` +
-      `- Prix par passager (arrondi haut) : ${prixParPassager} €\n` +
       `- Nombre de passagers : ${pax}`;
   }
 
