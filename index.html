@@ -305,13 +305,7 @@ function updateCalculateur2() {
     `- Commission fixe : ${commissionFixe} €\n` +
     `- Commission variable (arrondi haut) : ${commissionVariable} €\n` +
     `- TVA (arrondi haut) : ${tvaMontant} €\n`;
-
-  if (pilotFFA) {
-    details += `- Surcoût pilot FFA : ${pax} × 5 € = ${surcoutPilotFFA} €\n`;
-  }
-
-  details += `- Prix TTC total (entré) : ${prixTTCTotalPassagers} €`;
-
+    `- Surcoût pilot FFA : ${pax} × 5 € = ${surcoutPilotFFA} €\n`;
   document.getElementById('detailsCalculateur2').textContent = details;
 }
   // Init selects et calculs par défaut
