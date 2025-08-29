@@ -105,17 +105,17 @@
 
 <!-- Calculateur 2 à droite -->
 <div class="calculateur" id="calc2">
-  <h2>✈️ Voucher > Money Pilote </h2>
+  <h2>🎫 Voucher > Money Pilote </h2>
 
   <label for="prixTotalSlider">Voucher Value (€) :</label>
-  <input type="range" id="prixTotalSlider" min="50" max="5000" value="350" step="5" oninput="updateCalculateur2()">
+  <input type="range" id="prixTotalSlider" min="50" max="1500" value="250" step="2" oninput="updateCalculateur2()">
   <div class="slider-value">Prix total TTC : <span id="prixTotalValue">500</span> €</div>
 
   <label for="pax2">Nombre de passagers :</label>
   <input type="range" id="pax2" min="1" max="5" value="1" step="1" oninput="updateCalculateur2()">
   <div class="slider-value">Passagers : <span id="pax2Value">1</span></div>
 
-  <label class="checkbox-label"><input type="checkbox" id="pilotFFA2" onchange="updateCalculateur2()"> Pilot FFA (+5 € par passager, sans TVA ni commission)</label>
+  <label class="checkbox-label"><input type="checkbox" id="pilotFFA2" onchange="updateCalculateur2()">  Pilot FFA (+5 € / pas.)</label>
 
   <select id="country2" onchange="updateCalculateur2()"></select>
 
@@ -297,7 +297,7 @@
 
     // Construction de l’affichage
     let details = 
-      `Base passager HT (arrondi haut) : ${basePassagerHT} €\n` +
+      `Montant Pilot: ${basePassagerHT} €\n` +
       `Commission fixe : ${commissionFixe} €\n` +
       `Commission variable (arrondi haut) : ${commissionVariable} €\n` +
       `TVA (arrondi haut) : ${tvaMontant} €\n`;
