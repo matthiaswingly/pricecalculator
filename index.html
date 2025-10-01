@@ -75,10 +75,19 @@
 </head>
 <body>
 
-<!-- Switch commission en haut à droite -->
-<div style="position:fixed; top:10px; right:20px; background:#f4f4f4; padding:6px 12px; border-radius:6px; box-shadow:0 0 6px #ccc; z-index:100;">
+<!-- Switch commission en haut à droite (plus petit, nouvelle commission par défaut) -->
+<div style="
+  position:fixed; 
+  top:10px; 
+  right:20px; 
+  background:#f4f4f4; 
+  padding:3px 6px; 
+  border-radius:6px; 
+  box-shadow:0 0 6px #ccc; 
+  z-index:100; 
+  font-size:0.85em;">
   <label>
-    <input type="checkbox" id="switchCommission" onchange="updateCommission()"> Nouvelle commission
+    <input type="checkbox" id="switchCommission" onchange="updateCommission()" checked> Nouvelle commission
   </label>
 </div>
 
@@ -137,8 +146,9 @@
   const NEW_FIXE_PAR_PAX = 27;
   const NEW_COMMISSION_RATE = 0.305;
 
-  let FIXE_PAR_PAX = OLD_FIXE_PAR_PAX;
-  let COMMISSION_RATE = OLD_COMMISSION_RATE;
+  // Nouvelle commission par défaut
+  let FIXE_PAR_PAX = NEW_FIXE_PAR_PAX;
+  let COMMISSION_RATE = NEW_COMMISSION_RATE;
 
   // Fonction switch commission
   function updateCommission() {
@@ -219,7 +229,7 @@
 
   function getTvaRate(country) {
     const found = PAYE_TVA.find(p => p.country === country);
-    return found ? found.rate : 0.20; // défaut 20%
+    return found ? found.rate : 0.20;
   }
 
   function arrondiHaut(x) { return Math.ceil(x); }
