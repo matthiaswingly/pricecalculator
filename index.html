@@ -75,22 +75,6 @@
 </head>
 <body>
 
-<!-- Switch commission en haut -->
-<div style="
-  position:fixed; 
-  top:10px; 
-  right:20px; 
-  background:#f4f4f4; 
-  padding:3px 6px; 
-  border-radius:6px; 
-  box-shadow:0 0 6px #ccc; 
-  z-index:100; 
-  font-size:0.85em;">
-  <label>
-    <input type="checkbox" id="switchCommission" checked onchange="updateCommission()"> Nouvelle commission
-  </label>
-</div>
-
 <!-- Calculateur 1 -->
 <div class="calculateur" id="calc1">
   <h2>✈️ Costs > Wingly Price </h2>
@@ -113,7 +97,14 @@
 
   <label class="checkbox-label"><input type="checkbox" id="pilotFFAPilote" onchange="updateCalculateur1()"> Pilot FFA (+5 € / pas.)</label>
 
+  <label for="country1">Pays :</label>
   <select id="country1" onchange="updateCalculateur1()"></select>
+
+  <label for="commissionSelect1">Type de commission :</label>
+  <select id="commissionSelect1" onchange="updateCalculateur1()">
+    <option value="new" selected>Nouvelle commission</option>
+    <option value="old">Ancienne commission</option>
+  </select>
 
   <div class="result" id="resultatCalculateur1">Prix TTC par passager : 0 €<br>Prix TTC pour tout le passager : 0 €</div>
   <div class="details" id="detailsCalculateur1"></div>
@@ -133,27 +124,17 @@
 
   <label class="checkbox-label"><input type="checkbox" id="pilotFFA2" onchange="updateCalculateur2()">  Pilot FFA (+5 € / pas.)</label>
 
+  <label for="country2">Pays :</label>
   <select id="country2" onchange="updateCalculateur2()"></select>
+
+  <label for="commissionSelect2">Type de commission :</label>
+  <select id="commissionSelect2" onchange="updateCalculateur2()">
+    <option value="new" selected>Nouvelle commission</option>
+    <option value="old">Ancienne commission</option>
+  </select>
 
   <div class="result" id="resultatCalculateur2">Montant pour Pilot : 0 €</div>
   <div class="details" id="detailsCalculateur2"></div>
-</div>
-
-<!-- Switch commission en bas -->
-<div style="
-  position:fixed; 
-  bottom:10px; 
-  left:50%; 
-  transform:translateX(-50%);
-  background:#f4f4f4; 
-  padding:5px 10px; 
-  border-radius:6px; 
-  box-shadow:0 0 6px #ccc; 
-  z-index:100; 
-  font-size:0.85em;">
-  <label>
-    <input type="checkbox" id="switchCommissionBas" checked onchange="updateCommissionBas()"> Nouvelle commission
-  </label>
 </div>
 
 <script>
@@ -163,64 +144,23 @@
   const NEW_FIXE_PAR_PAX = 27;
   const NEW_COMMISSION_RATE = 0.305;
 
-  // Commission par défaut = nouvelle
-  let FIXE_PAR_PAX = NEW_FIXE_PAR_PAX;
-  let COMMISSION_RATE = NEW_COMMISSION_RATE;
-
-  // Switch commission
-  function updateCommission() {
-    const isNew = document.getElementById('switchCommission').checked;
-    if (isNew) {
-      FIXE_PAR_PAX = NEW_FIXE_PAR_PAX;
-      COMMISSION_RATE = NEW_COMMISSION_RATE;
-    } else {
-      FIXE_PAR_PAX = OLD_FIXE_PAR_PAX;
-      COMMISSION_RATE = OLD_COMMISSION_RATE;
-    }
-    updateCalculateur1();
-    updateCalculateur2();
-  }
-
-  function updateCommissionBas() {
-    const isNew = document.getElementById('switchCommissionBas').checked;
-    document.getElementById('switchCommission').checked = isNew;
-    updateCommission();
-  }
-
   const PAYE_TVA = [
-    { country: 'DE', rate: 0.19 },
-    { country: 'CH', rate: 0.07 },
-    { country: 'AT', rate: 0.20 },
-    { country: 'GB', rate: 0.20 },
-    { country: 'FR', rate: 0.20 },
-    { country: 'BE', rate: 0.21 },
-    { country: 'BG', rate: 0.20 },
-    { country: 'CZ', rate: 0.21 },
-    { country: 'DK', rate: 0.25 },
-    { country: 'ES', rate: 0.21 },
-    { country: 'FI', rate: 0.24 },
-    { country: 'GR', rate: 0.24 },
-    { country: 'HU', rate: 0.27 },
-    { country: 'IE', rate: 0.23 },
-    { country: 'IT', rate: 0.22 },
-    { country: 'LU', rate: 0.17 },
-    { country: 'NL', rate: 0.21 },
-    { country: 'NO', rate: 0.25 },
-    { country: 'PL', rate: 0.23 },
-    { country: 'PT', rate: 0.23 },
-    { country: 'SE', rate: 0.25 },
-    { country: 'SK', rate: 0.20 },
-    { country: 'IS', rate: 0.24 },
-    { country: 'RE', rate: 0.085 },
-    { country: 'MQ', rate: 0.085 },
-    { country: 'GP', rate: 0.085 },
-    { country: 'PF', rate: 0.16 },
-    { country: 'GY', rate: 0 },
-    { country: 'YT', rate: 0 },
-    { country: 'PM', rate: 0 },
-    { country: 'WF', rate: 0 },
-    { country: 'MF', rate: 0 },
-    { country: 'NC', rate: 0 }
+    { country: 'DE', rate: 0.19 }, { country: 'CH', rate: 0.07 },
+    { country: 'AT', rate: 0.20 }, { country: 'GB', rate: 0.20 },
+    { country: 'FR', rate: 0.20 }, { country: 'BE', rate: 0.21 },
+    { country: 'BG', rate: 0.20 }, { country: 'CZ', rate: 0.21 },
+    { country: 'DK', rate: 0.25 }, { country: 'ES', rate: 0.21 },
+    { country: 'FI', rate: 0.24 }, { country: 'GR', rate: 0.24 },
+    { country: 'HU', rate: 0.27 }, { country: 'IE', rate: 0.23 },
+    { country: 'IT', rate: 0.22 }, { country: 'LU', rate: 0.17 },
+    { country: 'NL', rate: 0.21 }, { country: 'NO', rate: 0.25 },
+    { country: 'PL', rate: 0.23 }, { country: 'PT', rate: 0.23 },
+    { country: 'SE', rate: 0.25 }, { country: 'SK', rate: 0.20 },
+    { country: 'IS', rate: 0.24 }, { country: 'RE', rate: 0.085 },
+    { country: 'MQ', rate: 0.085 }, { country: 'GP', rate: 0.085 },
+    { country: 'PF', rate: 0.16 }, { country: 'GY', rate: 0 },
+    { country: 'YT', rate: 0 }, { country: 'PM', rate: 0 },
+    { country: 'WF', rate: 0 }, { country: 'MF', rate: 0 }, { country: 'NC', rate: 0 }
   ];
 
   function remplirSelectPays(selectId) {
@@ -255,7 +195,14 @@
 
   function arrondiHaut(x) { return Math.ceil(x); }
 
+  function getCommissionType(selectId) {
+    const type = document.getElementById(selectId).value;
+    if (type === 'new') return { fixe: NEW_FIXE_PAR_PAX, rate: NEW_COMMISSION_RATE };
+    return { fixe: OLD_FIXE_PAR_PAX, rate: OLD_COMMISSION_RATE };
+  }
+
   function updateCalculateur1() {
+    const { fixe, rate } = getCommissionType('commissionSelect1');
     const prixAvion = parseFloat(document.getElementById('prixAvion').value);
     const tempsVol = parseFloat(document.getElementById('tempsVol').value);
     const coutAdditionnel = parseFloat(document.getElementById('coutAdditionnel').value);
@@ -272,8 +219,8 @@
     const dureeHeure = tempsVol / 60;
     const coutVolHT = prixAvion * dureeHeure + coutAdditionnel;
     const basePassagerHT = arrondiHaut((coutVolHT) / (pax + 1) * pax);
-    const commissionFixe = FIXE_PAR_PAX * pax;
-    const commissionVariableMontant = arrondiHaut(basePassagerHT * COMMISSION_RATE);
+    const commissionFixe = fixe * pax;
+    const commissionVariableMontant = arrondiHaut(basePassagerHT * rate);
     const tvaMontant = arrondiHaut((commissionFixe + commissionVariableMontant) * tvaRate);
     const surcoutPilotFFA = pilotFFA ? 5 * pax : 0;
     const prixTotalTTC = basePassagerHT + commissionFixe + commissionVariableMontant + tvaMontant + surcoutPilotFFA;
@@ -296,6 +243,7 @@
   }
 
   function updateCalculateur2() {
+    const { fixe, rate } = getCommissionType('commissionSelect2');
     const prixTTCTotalPassagers = parseFloat(document.getElementById('prixTotalSlider').value);
     const pax = parseInt(document.getElementById('pax2').value);
     const pilotFFA = document.getElementById('pilotFFA2').checked;
@@ -308,12 +256,12 @@
     const surcoutPilotFFA = pilotFFA ? pax * 5 : 0;
     let montantSansFFA = prixTTCTotalPassagers - surcoutPilotFFA;
 
-    const commissionFixe = FIXE_PAR_PAX * pax;
+    const commissionFixe = fixe * pax;
 
     let basePassagerHT = 0;
     let meilleurEcart = Infinity;
     for (let essai = 0; essai <= montantSansFFA; essai++) {
-      const commissionVariable = arrondiHaut(essai * COMMISSION_RATE);
+      const commissionVariable = arrondiHaut(essai * rate);
       const tvaMontant = arrondiHaut((commissionFixe + commissionVariable) * tvaRate);
       const totalReconstruit = essai + commissionFixe + commissionVariable + tvaMontant;
       const ecart = Math.abs(totalReconstruit - montantSansFFA);
@@ -323,7 +271,7 @@
       }
     }
 
-    const commissionVariable = arrondiHaut(basePassagerHT * COMMISSION_RATE);
+    const commissionVariable = arrondiHaut(basePassagerHT * rate);
     const tvaMontant = arrondiHaut((commissionFixe + commissionVariable) * tvaRate);
 
     document.getElementById('resultatCalculateur2').textContent = 
