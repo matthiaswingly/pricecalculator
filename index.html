@@ -75,7 +75,7 @@
 </head>
 <body>
 
-<!-- Switch commission en haut à droite (plus petit, nouvelle commission par défaut) -->
+<!-- Switch commission en haut -->
 <div style="
   position:fixed; 
   top:10px; 
@@ -87,17 +87,17 @@
   z-index:100; 
   font-size:0.85em;">
   <label>
-    <input type="checkbox" id="switchCommission" onchange="updateCommission()" checked> Nouvelle commission
+    <input type="checkbox" id="switchCommission" checked onchange="updateCommission()"> Nouvelle commission
   </label>
 </div>
 
-<!-- Calculateur 1 à gauche -->
+<!-- Calculateur 1 -->
 <div class="calculateur" id="calc1">
   <h2>✈️ Costs > Wingly Price </h2>
 
   <label for="prixAvion">Prix avion par heure (€) :</label>
   <input type="range" id="prixAvion" min="10" max="2000" value="270" step="5" oninput="updateCalculateur1()">
-  <div class="slider-value">Prix avion : <span id="prixAvionValue">200</span> €/h</div>
+  <div class="slider-value">Prix avion : <span id="prixAvionValue">270</span> €/h</div>
 
   <label for="tempsVol">Temps de vol (min.) :</label>
   <input type="range" id="tempsVol" min="10" max="150" value="60" step="5" oninput="updateCalculateur1()">
@@ -105,11 +105,11 @@
 
   <label for="coutAdditionnel">Coût additionnel (€) :</label>
   <input type="range" id="coutAdditionnel" min="0" max="300" value="30" step="2" oninput="updateCalculateur1()">
-  <div class="slider-value">Coût additionnel : <span id="coutAdditionnelValue">0</span> €</div>
+  <div class="slider-value">Coût additionnel : <span id="coutAdditionnelValue">30</span> €</div>
 
   <label for="pax">Nombre de passagers :</label>
   <input type="range" id="pax" min="1" max="5" value="2" step="1" oninput="updateCalculateur1()">
-  <div class="slider-value">Passagers : <span id="paxValue">1</span></div>
+  <div class="slider-value">Passagers : <span id="paxValue">2</span></div>
 
   <label class="checkbox-label"><input type="checkbox" id="pilotFFAPilote" onchange="updateCalculateur1()"> Pilot FFA (+5 € / pas.)</label>
 
@@ -119,17 +119,17 @@
   <div class="details" id="detailsCalculateur1"></div>
 </div>
 
-<!-- Calculateur 2 à droite -->
+<!-- Calculateur 2 -->
 <div class="calculateur" id="calc2">
   <h2>🎫 Voucher > Money Pilote </h2>
 
   <label for="prixTotalSlider">Voucher Value (€) :</label>
   <input type="range" id="prixTotalSlider" min="50" max="1500" value="250" step="2" oninput="updateCalculateur2()">
-  <div class="slider-value">Prix total TTC : <span id="prixTotalValue">500</span> €</div>
+  <div class="slider-value">Prix total TTC : <span id="prixTotalValue">250</span> €</div>
 
   <label for="pax2">Nombre de passagers :</label>
   <input type="range" id="pax2" min="1" max="5" value="2" step="1" oninput="updateCalculateur2()">
-  <div class="slider-value">Passagers : <span id="pax2Value">1</span></div>
+  <div class="slider-value">Passagers : <span id="pax2Value">2</span></div>
 
   <label class="checkbox-label"><input type="checkbox" id="pilotFFA2" onchange="updateCalculateur2()">  Pilot FFA (+5 € / pas.)</label>
 
@@ -139,6 +139,23 @@
   <div class="details" id="detailsCalculateur2"></div>
 </div>
 
+<!-- Switch commission en bas -->
+<div style="
+  position:fixed; 
+  bottom:10px; 
+  left:50%; 
+  transform:translateX(-50%);
+  background:#f4f4f4; 
+  padding:5px 10px; 
+  border-radius:6px; 
+  box-shadow:0 0 6px #ccc; 
+  z-index:100; 
+  font-size:0.85em;">
+  <label>
+    <input type="checkbox" id="switchCommissionBas" checked onchange="updateCommissionBas()"> Nouvelle commission
+  </label>
+</div>
+
 <script>
   // Ancienne et nouvelle commission
   const OLD_FIXE_PAR_PAX = 18;
@@ -146,11 +163,11 @@
   const NEW_FIXE_PAR_PAX = 27;
   const NEW_COMMISSION_RATE = 0.305;
 
-  // Nouvelle commission par défaut
+  // Commission par défaut = nouvelle
   let FIXE_PAR_PAX = NEW_FIXE_PAR_PAX;
   let COMMISSION_RATE = NEW_COMMISSION_RATE;
 
-  // Fonction switch commission
+  // Switch commission
   function updateCommission() {
     const isNew = document.getElementById('switchCommission').checked;
     if (isNew) {
@@ -162,6 +179,12 @@
     }
     updateCalculateur1();
     updateCalculateur2();
+  }
+
+  function updateCommissionBas() {
+    const isNew = document.getElementById('switchCommissionBas').checked;
+    document.getElementById('switchCommission').checked = isNew;
+    updateCommission();
   }
 
   const PAYE_TVA = [
@@ -203,12 +226,10 @@
   function remplirSelectPays(selectId) {
     const select = document.getElementById(selectId);
     select.innerHTML = '';
-
     const prioritaires = ['DE', 'CH', 'AT', 'GB', 'FR'];
     const paysPrioritaires = PAYE_TVA.filter(p => prioritaires.includes(p.country));
     const autresPays = PAYE_TVA.filter(p => !prioritaires.includes(p.country))
       .sort((a,b) => a.country.localeCompare(b.country));
-
     for (const p of paysPrioritaires) {
       const opt = document.createElement('option');
       opt.value = p.country;
@@ -233,7 +254,6 @@
   }
 
   function arrondiHaut(x) { return Math.ceil(x); }
-  function arrondiBas(x) { return Math.floor(x); }
 
   function updateCalculateur1() {
     const prixAvion = parseFloat(document.getElementById('prixAvion').value);
@@ -275,48 +295,48 @@
       `- Nombre de passagers : ${pax}`;
   }
 
-function updateCalculateur2() {
-  const prixTTCTotalPassagers = parseFloat(document.getElementById('prixTotalSlider').value);
-  const pax = parseInt(document.getElementById('pax2').value);
-  const pilotFFA = document.getElementById('pilotFFA2').checked;
-  const country = document.getElementById('country2').value;
-  const tvaRate = getTvaRate(country);
+  function updateCalculateur2() {
+    const prixTTCTotalPassagers = parseFloat(document.getElementById('prixTotalSlider').value);
+    const pax = parseInt(document.getElementById('pax2').value);
+    const pilotFFA = document.getElementById('pilotFFA2').checked;
+    const country = document.getElementById('country2').value;
+    const tvaRate = getTvaRate(country);
 
-  document.getElementById('prixTotalValue').innerText = prixTTCTotalPassagers;
-  document.getElementById('pax2Value').innerText = pax;
+    document.getElementById('prixTotalValue').innerText = prixTTCTotalPassagers;
+    document.getElementById('pax2Value').innerText = pax;
 
-  const surcoutPilotFFA = pilotFFA ? pax * 5 : 0;
-  let montantSansFFA = prixTTCTotalPassagers - surcoutPilotFFA;
+    const surcoutPilotFFA = pilotFFA ? pax * 5 : 0;
+    let montantSansFFA = prixTTCTotalPassagers - surcoutPilotFFA;
 
-  const commissionFixe = FIXE_PAR_PAX * pax;
+    const commissionFixe = FIXE_PAR_PAX * pax;
 
-  let basePassagerHT = 0;
-  let meilleurEcart = Infinity;
-  for (let essai = 0; essai <= montantSansFFA; essai++) {
-    const commissionVariable = arrondiHaut(essai * COMMISSION_RATE);
-    const tvaMontant = arrondiHaut((commissionFixe + commissionVariable) * tvaRate);
-    const totalReconstruit = essai + commissionFixe + commissionVariable + tvaMontant;
-    const ecart = Math.abs(totalReconstruit - montantSansFFA);
-    if (ecart < meilleurEcart) {
-      meilleurEcart = ecart;
-      basePassagerHT = essai;
+    let basePassagerHT = 0;
+    let meilleurEcart = Infinity;
+    for (let essai = 0; essai <= montantSansFFA; essai++) {
+      const commissionVariable = arrondiHaut(essai * COMMISSION_RATE);
+      const tvaMontant = arrondiHaut((commissionFixe + commissionVariable) * tvaRate);
+      const totalReconstruit = essai + commissionFixe + commissionVariable + tvaMontant;
+      const ecart = Math.abs(totalReconstruit - montantSansFFA);
+      if (ecart < meilleurEcart) {
+        meilleurEcart = ecart;
+        basePassagerHT = essai;
+      }
     }
+
+    const commissionVariable = arrondiHaut(basePassagerHT * COMMISSION_RATE);
+    const tvaMontant = arrondiHaut((commissionFixe + commissionVariable) * tvaRate);
+
+    document.getElementById('resultatCalculateur2').textContent = 
+      `Montant Pilot : ${basePassagerHT} €`;
+
+    let details =
+      `Détail calcul:\n` +
+      `- Commission fixe : ${commissionFixe} €\n` +
+      `- Commission variable (arrondi haut) : ${commissionVariable} €\n` +
+      `- TVA (arrondi haut) : ${tvaMontant} €\n` +
+      `- Surcoût pilot FFA : ${pax} × 5 € = ${surcoutPilotFFA} €\n`;
+    document.getElementById('detailsCalculateur2').textContent = details;
   }
-
-  const commissionVariable = arrondiHaut(basePassagerHT * COMMISSION_RATE);
-  const tvaMontant = arrondiHaut((commissionFixe + commissionVariable) * tvaRate);
-
-  document.getElementById('resultatCalculateur2').textContent = 
-    `Montant Pilot : ${basePassagerHT} €`;
-
-  let details =
-    `Détail calcul:\n` +
-    `- Commission fixe : ${commissionFixe} €\n` +
-    `- Commission variable (arrondi haut) : ${commissionVariable} €\n` +
-    `- TVA (arrondi haut) : ${tvaMontant} €\n` +
-    `- Surcoût pilot FFA : ${pax} × 5 € = ${surcoutPilotFFA} €\n`;
-  document.getElementById('detailsCalculateur2').textContent = details;
-}
 
   // Init
   remplirSelectPays('country1');
