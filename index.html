@@ -97,17 +97,17 @@
 
   <label class="checkbox-label"><input type="checkbox" id="pilotFFAPilote" onchange="updateCalculateur1()"> Pilot FFA (+5 € / pas.)</label>
 
-  <label for="country1">Pays :</label>
   <select id="country1" onchange="updateCalculateur1()"></select>
 
-  <label for="commissionSelect1">Type de commission :</label>
+
+
+  <div class="result" id="resultatCalculateur1">Prix TTC par passager : 0 €<br>Prix TTC pour tout le passager : 0 €</div>
+  <div class="details" id="detailsCalculateur1"></div>
+    <label for="commissionSelect1">Type de commission :</label>
   <select id="commissionSelect1" onchange="updateCalculateur1()">
     <option value="new" selected>Nouvelle commission</option>
     <option value="old">Ancienne commission</option>
   </select>
-
-  <div class="result" id="resultatCalculateur1">Prix TTC par passager : 0 €<br>Prix TTC pour tout le passager : 0 €</div>
-  <div class="details" id="detailsCalculateur1"></div>
 </div>
 
 <!-- Calculateur 2 -->
